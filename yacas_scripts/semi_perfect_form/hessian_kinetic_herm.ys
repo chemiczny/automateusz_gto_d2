@@ -1,0 +1,16 @@
+Use("overlap_gradient_herm.ys");
+Use("Cart2Herm.ys");
+
+kinetic'hessian'element(_s ,_i, _a, _j, _b, _xab, _gaussInd, _xyz) <-- [
+	Local(e);
+	e:={{2,0,0},{0,2,0},{0,0,2}};
+	For( it:=1, it<=3, it++)[
+		e[it][xyz[1]]:=e[it][xyz[1]]+1;
+		e[it][xyz[2]]:=e[it][xyz[2]]+1;
+	];
+	If(gaussInd[1] + gaussInd[2] = 3,
+	-1, 1)*
+	(-1/2*HermDerivative(s,i, j, a, b, xab, e[1])+
+    	-1/2*HermDerivative(s,i, j, a, b, xab, e[2])+
+    	-1/2*HermDerivative(s,i, j, a, b, xab, e[3]));
+];

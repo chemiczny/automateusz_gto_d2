@@ -1,0 +1,52 @@
+CartesianToSphericalMatrix := {
+    { { 1 } },
+    { { 1, 0, 0},
+      { 0, 1, 0},
+      { 0, 0, 1} },
+    { { 0, 0, 0, Sqrt(3.0), 0, 0},
+      { 0, 0, 0, 0, 0, Sqrt(3.0)},
+      {-0.5, -0.5, 1, 0, 0, 0},
+      { 0, 0, 0, 0, Sqrt(3.0), 0},
+      { 0.5*Sqrt(3.0), -0.5*Sqrt(3.0), 0, 0, 0, 0} },
+    { { 0, -Sqrt(5.0/8.0), 0, 3.0 * Sqrt(5.0/8.0), 0, 0, 0, 0, 0, 0},
+      { 0, 0, 0, 0, 0, 0, 0, 0, 0, Sqrt(15.0)},
+      { 0, -Sqrt(3.0/8.0), 0, -Sqrt(3.0/8.0), 0, 0, 0, 0, -Sqrt(6.0), 0},
+      { 0, 0, 1, 0, -1.5, -1.5, 0, 0, 0, 0},
+      { -Sqrt(3.0/8.0), 0, 0, 0, 0, 0, -Sqrt(3.0/8.0), Sqrt(6.0), 0, 0},
+      { 0, 0, 0, 0, Sqrt(7.5), -Sqrt(7.5), 0, 0, 0, 0},
+      { Sqrt(5.0/8.0), 0, 0, 0, 0, 0, Sqrt(45.0/8.0), 0, 0, 0} }
+};
+
+CartesianToSpherical(l1, l2, prefix) := [
+    Local(A1, A2, i, j, v');
+
+    A1 := CartesianToSphericalMatrix[l1 + 1];
+    A2 := CartesianToSphericalMatrix[l2 + 1];
+
+    v' := ZeroMatrix(2 * l1 + 1, 2 * l2 + 1);
+
+    For(i' := 0, i' < 2 * l1 + 1, i'++) [
+        For(j' := 0, j' < 2 * l2 + 1, j'++) [
+            Local(m1, m2);
+            For(i := 0, i < (l1 + 1) * (l1 + 2) / 2, i++) [
+                m1 := Shells[l1 + 1][i + 1];
+                For(j := 0, j < (l2 + 1) * (l2 + 2) / 2, j++) [
+                    m2 := Shells[l2 + 1][j + 1];
+
+                    Local(index, t, n, s, tag, aa);
+                    index := Concat(m1, m2);
+                    t := 10^Length(index);
+                    For(n := 1, n <= Length(index), n++)
+                        t := t + Reverse(index)[n] * 10^(n-1);
+                    v := ToString() Write(t);
+                    tag := prefix : v[Length(v) - 5 .. Length(v)];
+                    aa := A1[i'+1][i+1] * A2[j'+1][j+1];
+                    If (Not IsZero(aa),
+                        v'[i'+1][j'+1] := v'[i'+1][j'+1] + aa * Atom(tag));
+                ];
+            ];
+        ];
+    ];
+
+    v';
+];

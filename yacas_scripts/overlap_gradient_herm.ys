@@ -1,0 +1,50 @@
+
+
+0# DerSeries(_i , _j , 0, _k) <-- DerivE(i, j, 0, k);
+
+10# DerSeries(_i , _j, _E , _k) <--[
+	DerivE(i, j, E, k)+DerSeries(i, j, E-1, k);
+];
+
+Hd(_s, _i, _j,_a, _b, _xab, _k) <--[
+	Local(p);
+	p:=a+b;
+	Sqrt(Pi/p)*(DerivE(s, i, j, a, b, xab,  0, k));
+];
+
+0# DerivE(_s, _i, _j,_a, _b, _xab,  _t, 0) <--s @ {i, j, t, a, b, xab};
+
+10# DerivE(_s, _i, _j,_a, _b, _xab,  _t, _k)_(i<0 Or j<0 Or t> i+j) <-- 0;
+
+20# DerivE(_s, 0, 0,_a, _b, _xab,  0,  1) <--[
+	Local(p);
+	p:=a+b;
+	-2*a*b*xab*(s @ {0, 0, 0,a, b, xab})/p;
+];
+
+25# DerivE(_s, 0,0, _a, _b, _xab, 0, _k)<-- [
+	-2*a*b/(a+b) * (xab*DerivE(s, 0,0, a, b, xab, 0, k-1)+(k-1)*DerivE(s, 0,0,a,b,xab,0, k-2));
+];
+
+30# DerivE(_s, _i, _j,_a, _b, _xab, _t, _k)_(i>=j) <-- [
+	Local(p);
+	p:=a+b;
+	1/(2*p) * DerivE(s, i-1, j,a, b, xab, t-1, k)-b/p*(xab*DerivE(s, i-1, j,a, b, xab, t, k)+k*DerivE(s, i-1, j,a, b, xab, t, k-1))+(t+1)*DerivE(s, i-1, j,a, b, xab, t+1, k);
+];
+
+30# DerivE(_s, _i, _j,_a, _b, _xab, _t, _k)_(i<j) <-- [
+	Local(p);
+	p:=a+b;
+	1/(2*p) * DerivE(s, i, j-1,a, b, xab, t-1, k)+a/p*(xab*DerivE(s, i, j-1,a, b, xab, t, k)+k*DerivE(s, i, j-1,a, b, xab, t, k-1))+(t+1)*DerivE(s, i, j-1,a, b, xab, t+1, k);
+];
+
+HermDerivative(_s, _i, _j, _a, _b, _xab, _e) <--
+    Hd(s, i[1], j[1], a, b, xab[1], e[1])*
+    Hd(s, i[2], j[2], a, b, xab[2], e[2])*
+    Hd(s, i[3], j[3], a, b, xab[3], e[3]);
+
+overlapHerm'gradient(_s ,_i, _a, _j, _b, _xab) <-- {
+    HermDerivative(s, i, j, a, b, xab, {1,0,0}),
+    HermDerivative(s, i, j, a, b, xab, {0,1,0}),
+    HermDerivative(s, i, j, a, b, xab, {0,0,1})
+};

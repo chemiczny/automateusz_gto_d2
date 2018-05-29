@@ -1,0 +1,300 @@
+#ifndef D2_EE_MATRIX_HPP
+#define D2_EE_MATRIX_HPP
+
+#include "gto_d2_kit/d2_ee_pppp_AA.hpp"
+#include "gto_d2_kit/d2_ee_ppps_AA.hpp"
+#include "gto_d2_kit/d2_ee_ppsp_AA.hpp"
+#include "gto_d2_kit/d2_ee_ppss_AA.hpp"
+#include "gto_d2_kit/d2_ee_pspp_AA.hpp"
+#include "gto_d2_kit/d2_ee_psps_AA.hpp"
+#include "gto_d2_kit/d2_ee_pssp_AA.hpp"
+#include "gto_d2_kit/d2_ee_psss_AA.hpp"
+#include "gto_d2_kit/d2_ee_sppp_AA.hpp"
+#include "gto_d2_kit/d2_ee_spps_AA.hpp"
+#include "gto_d2_kit/d2_ee_spsp_AA.hpp"
+#include "gto_d2_kit/d2_ee_spss_AA.hpp"
+#include "gto_d2_kit/d2_ee_sspp_AA.hpp"
+#include "gto_d2_kit/d2_ee_ssps_AA.hpp"
+#include "gto_d2_kit/d2_ee_sssp_AA.hpp"
+#include "gto_d2_kit/d2_ee_ssss_AA.hpp"
+#include "gto_d2_kit/d2_ee_pppp_AC.hpp"
+#include "gto_d2_kit/d2_ee_ppps_AC.hpp"
+#include "gto_d2_kit/d2_ee_ppsp_AC.hpp"
+#include "gto_d2_kit/d2_ee_ppss_AC.hpp"
+#include "gto_d2_kit/d2_ee_pspp_AC.hpp"
+#include "gto_d2_kit/d2_ee_psps_AC.hpp"
+#include "gto_d2_kit/d2_ee_pssp_AC.hpp"
+#include "gto_d2_kit/d2_ee_psss_AC.hpp"
+#include "gto_d2_kit/d2_ee_sppp_AC.hpp"
+#include "gto_d2_kit/d2_ee_spps_AC.hpp"
+#include "gto_d2_kit/d2_ee_spsp_AC.hpp"
+#include "gto_d2_kit/d2_ee_spss_AC.hpp"
+#include "gto_d2_kit/d2_ee_sspp_AC.hpp"
+#include "gto_d2_kit/d2_ee_ssps_AC.hpp"
+#include "gto_d2_kit/d2_ee_sssp_AC.hpp"
+#include "gto_d2_kit/d2_ee_ssss_AC.hpp"
+#include "gto_d2_kit/d2_ee_pppp_AB.hpp"
+#include "gto_d2_kit/d2_ee_ppps_AB.hpp"
+#include "gto_d2_kit/d2_ee_ppsp_AB.hpp"
+#include "gto_d2_kit/d2_ee_ppss_AB.hpp"
+#include "gto_d2_kit/d2_ee_pspp_AB.hpp"
+#include "gto_d2_kit/d2_ee_psps_AB.hpp"
+#include "gto_d2_kit/d2_ee_pssp_AB.hpp"
+#include "gto_d2_kit/d2_ee_psss_AB.hpp"
+#include "gto_d2_kit/d2_ee_sppp_AB.hpp"
+#include "gto_d2_kit/d2_ee_spps_AB.hpp"
+#include "gto_d2_kit/d2_ee_spsp_AB.hpp"
+#include "gto_d2_kit/d2_ee_spss_AB.hpp"
+#include "gto_d2_kit/d2_ee_sspp_AB.hpp"
+#include "gto_d2_kit/d2_ee_ssps_AB.hpp"
+#include "gto_d2_kit/d2_ee_sssp_AB.hpp"
+#include "gto_d2_kit/d2_ee_ssss_AB.hpp"
+#include "gto_d2_kit/d2_ee_pppp_AD.hpp"
+#include "gto_d2_kit/d2_ee_ppps_AD.hpp"
+#include "gto_d2_kit/d2_ee_ppsp_AD.hpp"
+#include "gto_d2_kit/d2_ee_ppss_AD.hpp"
+#include "gto_d2_kit/d2_ee_pspp_AD.hpp"
+#include "gto_d2_kit/d2_ee_psps_AD.hpp"
+#include "gto_d2_kit/d2_ee_pssp_AD.hpp"
+#include "gto_d2_kit/d2_ee_psss_AD.hpp"
+#include "gto_d2_kit/d2_ee_sppp_AD.hpp"
+#include "gto_d2_kit/d2_ee_spps_AD.hpp"
+#include "gto_d2_kit/d2_ee_spsp_AD.hpp"
+#include "gto_d2_kit/d2_ee_spss_AD.hpp"
+#include "gto_d2_kit/d2_ee_sspp_AD.hpp"
+#include "gto_d2_kit/d2_ee_ssps_AD.hpp"
+#include "gto_d2_kit/d2_ee_sssp_AD.hpp"
+#include "gto_d2_kit/d2_ee_ssss_AD.hpp"
+#include "gto_d2_kit/d2_ee_pppp_CC.hpp"
+#include "gto_d2_kit/d2_ee_ppps_CC.hpp"
+#include "gto_d2_kit/d2_ee_ppsp_CC.hpp"
+#include "gto_d2_kit/d2_ee_ppss_CC.hpp"
+#include "gto_d2_kit/d2_ee_pspp_CC.hpp"
+#include "gto_d2_kit/d2_ee_psps_CC.hpp"
+#include "gto_d2_kit/d2_ee_pssp_CC.hpp"
+#include "gto_d2_kit/d2_ee_psss_CC.hpp"
+#include "gto_d2_kit/d2_ee_sppp_CC.hpp"
+#include "gto_d2_kit/d2_ee_spps_CC.hpp"
+#include "gto_d2_kit/d2_ee_spsp_CC.hpp"
+#include "gto_d2_kit/d2_ee_spss_CC.hpp"
+#include "gto_d2_kit/d2_ee_sspp_CC.hpp"
+#include "gto_d2_kit/d2_ee_ssps_CC.hpp"
+#include "gto_d2_kit/d2_ee_sssp_CC.hpp"
+#include "gto_d2_kit/d2_ee_ssss_CC.hpp"
+#include "gto_d2_kit/d2_ee_pppp_CD.hpp"
+#include "gto_d2_kit/d2_ee_ppps_CD.hpp"
+#include "gto_d2_kit/d2_ee_ppsp_CD.hpp"
+#include "gto_d2_kit/d2_ee_ppss_CD.hpp"
+#include "gto_d2_kit/d2_ee_pspp_CD.hpp"
+#include "gto_d2_kit/d2_ee_psps_CD.hpp"
+#include "gto_d2_kit/d2_ee_pssp_CD.hpp"
+#include "gto_d2_kit/d2_ee_psss_CD.hpp"
+#include "gto_d2_kit/d2_ee_sppp_CD.hpp"
+#include "gto_d2_kit/d2_ee_spps_CD.hpp"
+#include "gto_d2_kit/d2_ee_spsp_CD.hpp"
+#include "gto_d2_kit/d2_ee_spss_CD.hpp"
+#include "gto_d2_kit/d2_ee_sspp_CD.hpp"
+#include "gto_d2_kit/d2_ee_ssps_CD.hpp"
+#include "gto_d2_kit/d2_ee_sssp_CD.hpp"
+#include "gto_d2_kit/d2_ee_ssss_CD.hpp"
+#include "gto_d2_kit/d2_ee_pppp_BC.hpp"
+#include "gto_d2_kit/d2_ee_ppps_BC.hpp"
+#include "gto_d2_kit/d2_ee_ppsp_BC.hpp"
+#include "gto_d2_kit/d2_ee_ppss_BC.hpp"
+#include "gto_d2_kit/d2_ee_pspp_BC.hpp"
+#include "gto_d2_kit/d2_ee_psps_BC.hpp"
+#include "gto_d2_kit/d2_ee_pssp_BC.hpp"
+#include "gto_d2_kit/d2_ee_psss_BC.hpp"
+#include "gto_d2_kit/d2_ee_sppp_BC.hpp"
+#include "gto_d2_kit/d2_ee_spps_BC.hpp"
+#include "gto_d2_kit/d2_ee_spsp_BC.hpp"
+#include "gto_d2_kit/d2_ee_spss_BC.hpp"
+#include "gto_d2_kit/d2_ee_sspp_BC.hpp"
+#include "gto_d2_kit/d2_ee_ssps_BC.hpp"
+#include "gto_d2_kit/d2_ee_sssp_BC.hpp"
+#include "gto_d2_kit/d2_ee_ssss_BC.hpp"
+#include "gto_d2_kit/d2_ee_pppp_BB.hpp"
+#include "gto_d2_kit/d2_ee_ppps_BB.hpp"
+#include "gto_d2_kit/d2_ee_ppsp_BB.hpp"
+#include "gto_d2_kit/d2_ee_ppss_BB.hpp"
+#include "gto_d2_kit/d2_ee_pspp_BB.hpp"
+#include "gto_d2_kit/d2_ee_psps_BB.hpp"
+#include "gto_d2_kit/d2_ee_pssp_BB.hpp"
+#include "gto_d2_kit/d2_ee_psss_BB.hpp"
+#include "gto_d2_kit/d2_ee_sppp_BB.hpp"
+#include "gto_d2_kit/d2_ee_spps_BB.hpp"
+#include "gto_d2_kit/d2_ee_spsp_BB.hpp"
+#include "gto_d2_kit/d2_ee_spss_BB.hpp"
+#include "gto_d2_kit/d2_ee_sspp_BB.hpp"
+#include "gto_d2_kit/d2_ee_ssps_BB.hpp"
+#include "gto_d2_kit/d2_ee_sssp_BB.hpp"
+#include "gto_d2_kit/d2_ee_ssss_BB.hpp"
+#include "gto_d2_kit/d2_ee_pppp_BD.hpp"
+#include "gto_d2_kit/d2_ee_ppps_BD.hpp"
+#include "gto_d2_kit/d2_ee_ppsp_BD.hpp"
+#include "gto_d2_kit/d2_ee_ppss_BD.hpp"
+#include "gto_d2_kit/d2_ee_pspp_BD.hpp"
+#include "gto_d2_kit/d2_ee_psps_BD.hpp"
+#include "gto_d2_kit/d2_ee_pssp_BD.hpp"
+#include "gto_d2_kit/d2_ee_psss_BD.hpp"
+#include "gto_d2_kit/d2_ee_sppp_BD.hpp"
+#include "gto_d2_kit/d2_ee_spps_BD.hpp"
+#include "gto_d2_kit/d2_ee_spsp_BD.hpp"
+#include "gto_d2_kit/d2_ee_spss_BD.hpp"
+#include "gto_d2_kit/d2_ee_sspp_BD.hpp"
+#include "gto_d2_kit/d2_ee_ssps_BD.hpp"
+#include "gto_d2_kit/d2_ee_sssp_BD.hpp"
+#include "gto_d2_kit/d2_ee_ssss_BD.hpp"
+#include "gto_d2_kit/d2_ee_pppp_DD.hpp"
+#include "gto_d2_kit/d2_ee_ppps_DD.hpp"
+#include "gto_d2_kit/d2_ee_ppsp_DD.hpp"
+#include "gto_d2_kit/d2_ee_ppss_DD.hpp"
+#include "gto_d2_kit/d2_ee_pspp_DD.hpp"
+#include "gto_d2_kit/d2_ee_psps_DD.hpp"
+#include "gto_d2_kit/d2_ee_pssp_DD.hpp"
+#include "gto_d2_kit/d2_ee_psss_DD.hpp"
+#include "gto_d2_kit/d2_ee_sppp_DD.hpp"
+#include "gto_d2_kit/d2_ee_spps_DD.hpp"
+#include "gto_d2_kit/d2_ee_spsp_DD.hpp"
+#include "gto_d2_kit/d2_ee_spss_DD.hpp"
+#include "gto_d2_kit/d2_ee_sspp_DD.hpp"
+#include "gto_d2_kit/d2_ee_ssps_DD.hpp"
+#include "gto_d2_kit/d2_ee_sssp_DD.hpp"
+#include "gto_d2_kit/d2_ee_ssss_DD.hpp"
+
+
+typedef void (*ERID2)(const double,const double,const double,const double,const double,const double,const double,const double,const double,
+					  const double,const double,const double,const double,const double,const double,const double, const double* const, 
+					  double* const  d2eexx, double* const d2eexy, double* const d2eexz,
+					  double* const  d2eeyx, double* const d2eeyy, double* const d2eeyz,
+					  double* const  d2eezx, double* const d2eezy, double* const d2eezz);
+
+ERID2 erid2[2][2][2][2][4][4]=
+{
+	{
+		{
+			{
+				{
+					{second_derivative_ee_0000_11 , second_derivative_ee_0000_12 , second_derivative_ee_0000_13 , second_derivative_ee_0000_14 },
+					{second_derivative_ee_0000_21 , second_derivative_ee_0000_22 , second_derivative_ee_0000_23 , second_derivative_ee_0000_24 },
+					{second_derivative_ee_0000_31 , second_derivative_ee_0000_32 , second_derivative_ee_0000_33 , second_derivative_ee_0000_34 },
+					{second_derivative_ee_0000_41 , second_derivative_ee_0000_42 , second_derivative_ee_0000_43 , second_derivative_ee_0000_44 }
+				},
+				{
+					{second_derivative_ee_0001_11 , second_derivative_ee_0001_12 , second_derivative_ee_0001_13 , second_derivative_ee_0001_14 },
+					{second_derivative_ee_0001_21 , second_derivative_ee_0001_22 , second_derivative_ee_0001_23 , second_derivative_ee_0001_24 },
+					{second_derivative_ee_0001_31 , second_derivative_ee_0001_32 , second_derivative_ee_0001_33 , second_derivative_ee_0001_34 },
+					{second_derivative_ee_0001_41 , second_derivative_ee_0001_42 , second_derivative_ee_0001_43 , second_derivative_ee_0001_44 }
+				}
+			},
+			{
+				{
+					{second_derivative_ee_0010_11 , second_derivative_ee_0010_12 , second_derivative_ee_0010_13 , second_derivative_ee_0010_14 },
+					{second_derivative_ee_0010_21 , second_derivative_ee_0010_22 , second_derivative_ee_0010_23 , second_derivative_ee_0010_24 },
+					{second_derivative_ee_0010_31 , second_derivative_ee_0010_32 , second_derivative_ee_0010_33 , second_derivative_ee_0010_34 },
+					{second_derivative_ee_0010_41 , second_derivative_ee_0010_42 , second_derivative_ee_0010_43 , second_derivative_ee_0010_44 }
+				},
+				{
+					{second_derivative_ee_0011_11 , second_derivative_ee_0011_12 , second_derivative_ee_0011_13 , second_derivative_ee_0011_14 },
+					{second_derivative_ee_0011_21 , second_derivative_ee_0011_22 , second_derivative_ee_0011_23 , second_derivative_ee_0011_24 },
+					{second_derivative_ee_0011_31 , second_derivative_ee_0011_32 , second_derivative_ee_0011_33 , second_derivative_ee_0011_34 },
+					{second_derivative_ee_0011_41 , second_derivative_ee_0011_42 , second_derivative_ee_0011_43 , second_derivative_ee_0011_44 }
+				}
+			}
+		},
+		{
+			{
+				{
+					{second_derivative_ee_0100_11 , second_derivative_ee_0100_12 , second_derivative_ee_0100_13 , second_derivative_ee_0100_14 },
+					{second_derivative_ee_0100_21 , second_derivative_ee_0100_22 , second_derivative_ee_0100_23 , second_derivative_ee_0100_24 },
+					{second_derivative_ee_0100_31 , second_derivative_ee_0100_32 , second_derivative_ee_0100_33 , second_derivative_ee_0100_34 },
+					{second_derivative_ee_0100_41 , second_derivative_ee_0100_42 , second_derivative_ee_0100_43 , second_derivative_ee_0100_44 }
+				},
+				{
+					{second_derivative_ee_0101_11 , second_derivative_ee_0101_12 , second_derivative_ee_0101_13 , second_derivative_ee_0101_14 },
+					{second_derivative_ee_0101_21 , second_derivative_ee_0101_22 , second_derivative_ee_0101_23 , second_derivative_ee_0101_24 },
+					{second_derivative_ee_0101_31 , second_derivative_ee_0101_32 , second_derivative_ee_0101_33 , second_derivative_ee_0101_34 },
+					{second_derivative_ee_0101_41 , second_derivative_ee_0101_42 , second_derivative_ee_0101_43 , second_derivative_ee_0101_44 }
+				}
+			},
+			{
+				{
+					{second_derivative_ee_0110_11 , second_derivative_ee_0110_12 , second_derivative_ee_0110_13 , second_derivative_ee_0110_14 },
+					{second_derivative_ee_0110_21 , second_derivative_ee_0110_22 , second_derivative_ee_0110_23 , second_derivative_ee_0110_24 },
+					{second_derivative_ee_0110_31 , second_derivative_ee_0110_32 , second_derivative_ee_0110_33 , second_derivative_ee_0110_34 },
+					{second_derivative_ee_0110_41 , second_derivative_ee_0110_42 , second_derivative_ee_0110_43 , second_derivative_ee_0110_44 }
+				},
+				{
+					{second_derivative_ee_0111_11 , second_derivative_ee_0111_12 , second_derivative_ee_0111_13 , second_derivative_ee_0111_14 },
+					{second_derivative_ee_0111_21 , second_derivative_ee_0111_22 , second_derivative_ee_0111_23 , second_derivative_ee_0111_24 },
+					{second_derivative_ee_0111_31 , second_derivative_ee_0111_32 , second_derivative_ee_0111_33 , second_derivative_ee_0111_34 },
+					{second_derivative_ee_0111_41 , second_derivative_ee_0111_42 , second_derivative_ee_0111_43 , second_derivative_ee_0111_44 }
+				}
+			}
+		}
+	},
+	{
+		{
+			{
+				{
+					{second_derivative_ee_1000_11 , second_derivative_ee_1000_12 , second_derivative_ee_1000_13 , second_derivative_ee_1000_14 },
+					{second_derivative_ee_1000_21 , second_derivative_ee_1000_22 , second_derivative_ee_1000_23 , second_derivative_ee_1000_24 },
+					{second_derivative_ee_1000_31 , second_derivative_ee_1000_32 , second_derivative_ee_1000_33 , second_derivative_ee_1000_34 },
+					{second_derivative_ee_1000_41 , second_derivative_ee_1000_42 , second_derivative_ee_1000_43 , second_derivative_ee_1000_44 }
+				},
+				{
+					{second_derivative_ee_1001_11 , second_derivative_ee_1001_12 , second_derivative_ee_1001_13 , second_derivative_ee_1001_14 },
+					{second_derivative_ee_1001_21 , second_derivative_ee_1001_22 , second_derivative_ee_1001_23 , second_derivative_ee_1001_24 },
+					{second_derivative_ee_1001_31 , second_derivative_ee_1001_32 , second_derivative_ee_1001_33 , second_derivative_ee_1001_34 },
+					{second_derivative_ee_1001_41 , second_derivative_ee_1001_42 , second_derivative_ee_1001_43 , second_derivative_ee_1001_44 }
+				}
+			},
+			{
+				{
+					{second_derivative_ee_1010_11 , second_derivative_ee_1010_12 , second_derivative_ee_1010_13 , second_derivative_ee_1010_14 },
+					{second_derivative_ee_1010_21 , second_derivative_ee_1010_22 , second_derivative_ee_1010_23 , second_derivative_ee_1010_24 },
+					{second_derivative_ee_1010_31 , second_derivative_ee_1010_32 , second_derivative_ee_1010_33 , second_derivative_ee_1010_34 },
+					{second_derivative_ee_1010_41 , second_derivative_ee_1010_42 , second_derivative_ee_1010_43 , second_derivative_ee_1010_44 }
+				},
+				{
+					{second_derivative_ee_1011_11 , second_derivative_ee_1011_12 , second_derivative_ee_1011_13 , second_derivative_ee_1011_14 },
+					{second_derivative_ee_1011_21 , second_derivative_ee_1011_22 , second_derivative_ee_1011_23 , second_derivative_ee_1011_24 },
+					{second_derivative_ee_1011_31 , second_derivative_ee_1011_32 , second_derivative_ee_1011_33 , second_derivative_ee_1011_34 },
+					{second_derivative_ee_1011_41 , second_derivative_ee_1011_42 , second_derivative_ee_1011_43 , second_derivative_ee_1011_44 }
+				}
+			}
+		},
+		{
+			{
+				{
+					{second_derivative_ee_1100_11 , second_derivative_ee_1100_12 , second_derivative_ee_1100_13 , second_derivative_ee_1100_14 },
+					{second_derivative_ee_1100_21 , second_derivative_ee_1100_22 , second_derivative_ee_1100_23 , second_derivative_ee_1100_24 },
+					{second_derivative_ee_1100_31 , second_derivative_ee_1100_32 , second_derivative_ee_1100_33 , second_derivative_ee_1100_34 },
+					{second_derivative_ee_1100_41 , second_derivative_ee_1100_42 , second_derivative_ee_1100_43 , second_derivative_ee_1100_44 }
+				},
+				{
+					{second_derivative_ee_1101_11 , second_derivative_ee_1101_12 , second_derivative_ee_1101_13 , second_derivative_ee_1101_14 },
+					{second_derivative_ee_1101_21 , second_derivative_ee_1101_22 , second_derivative_ee_1101_23 , second_derivative_ee_1101_24 },
+					{second_derivative_ee_1101_31 , second_derivative_ee_1101_32 , second_derivative_ee_1101_33 , second_derivative_ee_1101_34 },
+					{second_derivative_ee_1101_41 , second_derivative_ee_1101_42 , second_derivative_ee_1101_43 , second_derivative_ee_1101_44 }
+				}
+			},
+			{
+				{
+					{second_derivative_ee_1110_11 , second_derivative_ee_1110_12 , second_derivative_ee_1110_13 , second_derivative_ee_1110_14 },
+					{second_derivative_ee_1110_21 , second_derivative_ee_1110_22 , second_derivative_ee_1110_23 , second_derivative_ee_1110_24 },
+					{second_derivative_ee_1110_31 , second_derivative_ee_1110_32 , second_derivative_ee_1110_33 , second_derivative_ee_1110_34 },
+					{second_derivative_ee_1110_41 , second_derivative_ee_1110_42 , second_derivative_ee_1110_43 , second_derivative_ee_1110_44 }
+				},
+				{
+					{second_derivative_ee_1111_11 , second_derivative_ee_1111_12 , second_derivative_ee_1111_13 , second_derivative_ee_1111_14 },
+					{second_derivative_ee_1111_21 , second_derivative_ee_1111_22 , second_derivative_ee_1111_23 , second_derivative_ee_1111_24 },
+					{second_derivative_ee_1111_31 , second_derivative_ee_1111_32 , second_derivative_ee_1111_33 , second_derivative_ee_1111_34 },
+					{second_derivative_ee_1111_41 , second_derivative_ee_1111_42 , second_derivative_ee_1111_43 , second_derivative_ee_1111_44 }
+				}
+			}
+		}
+	}
+};
+
+#endif

@@ -1,0 +1,209 @@
+// For an expression e return a list of all simple subexpressions
+UnProtect(CSE);
+
+Function("CSE'FindSimpleSubexpressions", {e})
+[
+   Local(r);
+   r := {};
+   
+   If(Not IsAtom(e),
+   [
+      Local(p, l);
+      l := Listify(e);
+
+      If(Apply("And",(MapSingle("IsAtom",l))) And Not Head(l) = List,
+         r := {l}, 
+         ForEach(p, Tail(l)) r := Concat(r, CSE'FindSimpleSubexpressions(p))
+      );
+   ]);
+   r;
+];
+
+// For a list of (listified) expressions return list of unique 
+// expressions which are present more then once in the original 
+// list
+Function("CSE'RemoveUncommonSubexpressions", {cs})
+[
+   Local(r,h);
+   r := {};
+   While(cs != {}) [
+       h := Head(cs);
+       cs := Tail(cs);
+       If(Contains(cs, h) And Not Contains(r, h), DestructiveAppend(r, h));
+   ];
+   r;
+];
+
+// For a list of (listified) expressions return list of 
+// pairs (unique_id, expression)
+Function("CSE'TagSubexpressions", {l})
+[
+   Local(r);
+   r := {};
+   ForEach(i, l) [
+      Push(r, {UniqueConstant(), i});
+   ];
+   r;
+];
+
+// Given a list of pairs (identifier, listified_subexpression), replace 
+// all occurences of subexpression in expression e with the corresponding
+// identifier
+Function("CSE'SubstituteTaggedSubexpressions", {sl, e})
+[
+   Local(r);
+   r := e;
+   ForEach(i, sl) [
+      r := Subst(UnList(i[2]), i[1])r;
+   ];
+   r;
+];
+
+// Generate list of assignements from the list of pairs 
+// (identifier, listified_expression)
+Function("CSE'GenerateAssignments", {sl})
+[
+   Local(r);
+   r := {};
+   ForEach(i, sl) [
+      Local(a);
+      a := {:=, i[1], UnList(i[2]) };
+      Push(r, UnList(a));
+   ];
+   r;
+];
+
+// Generate list of strings with declarations and initializations
+// representing the assignements in al
+Function("CSE'EmitDefinitions", {al})
+[
+   Local(r);
+   r := {};
+   ForEach(i, al) [
+      Push(r, "const double " : CppForm(i) : ";");
+   ];
+   r;
+];
+
+// For an expression e:
+//   - find all simple subexpressions present more then once
+//   - generate unique ids for for each of them
+//   - substitute them with the ids
+//   - return substituded list of substitutions and substituted id
+Function("CSE", {e})
+[
+   Local(re, csl, t);
+
+   re := e;
+   csl := {};
+   t := {};
+   
+   Until(Length(t) = 0) [
+      t := CSE'TagSubexpressions(CSE'RemoveUncommonSubexpressions(CSE'FindSimpleSubexpressions(re)));
+      If(Length(t) != 0,
+      [
+         re := CSE'SubstituteTaggedSubexpressions(t, re);
+         csl := Concat(csl, t);
+      ]);
+   ];
+
+   { re, csl };
+];
+
+Function("CSE'FindFuncCalls", {e, f})
+[
+   Local(r);
+   r := {};
+   
+   If(Type(e) = f, [
+       DestructiveAppend(r, e);
+   ], If (Not IsAtom(e), [
+           Local(p, l);
+           l := Listify(e);
+
+           ForEach(p, Tail(l)) r := Concat(r, CSE'FindFuncCalls(p, f));
+       ])
+   );
+   r;
+];
+
+Function("CSE'Extract", {expr, f})
+[
+    Local(e, i, l, csl, uc);
+
+    e := expr;
+
+    l := Listify /@ CSE'FindFuncCalls(e, f);
+    l := RemoveDuplicates(l);
+
+    csl := {};
+
+    ForEach(i, l) [
+        uc := UniqueConstant();
+        DestructiveAppend(csl, {uc, i});
+        e := Subst(UnList(i), uc) e;
+    ];
+
+    {csl, e};
+];
+
+Function("CSE'FindFuncMultiCalls", {e, multif})
+[
+   Local(r, fIt, i, fNo, rNew, found);
+   r := {};
+   fNo := Length(multif);
+   For( i :=0, i < fNo, i:= i+1 ) [
+   		r := Append( r, {} );
+   ];
+   found := False;
+   For( fIt := 1, fIt <= fNo, fIt := fIt + 1 ) [
+			If ( Type(e) = multif[fIt],
+			[
+       		DestructiveAppend(r[fIt], e) ;
+			found := True;
+			]);
+   ];
+   
+   If( Not IsAtom(e) And Not found ,   [
+           Local(p, l);
+           l := Listify(e);
+
+           ForEach(p, Tail(l)) [ 
+		   		rNew := CSE'FindFuncMultiCalls(p, multif); 
+				For( i :=1, i <= fNo, i:= i+1 ) [
+					r[i] := Concat( r[i], rNew[i] );
+				];
+		   ];
+       ]
+   );
+   //Echo("//Przed wyjebaniem: ", r);
+   r;
+];
+
+Function("CSE'ExtractMulti", {expr, f})
+[
+    Local(e, i, l, csl, uc, lSize, k);
+
+    e := expr;
+	//Echo("//Multi gunwo wejscie");
+    l := CSE'FindFuncMultiCalls(e, f);
+	lSize := Length( l );
+	//Echo("//Po multi gowienku");
+	csl := {};
+	For( i:=1, i <= lSize, i := i+1 ) [
+		l[i] := Listify /@ l[i] ;
+    	l[i] := RemoveDuplicates(l[i]);
+		csl := Append( csl, {} );
+	];
+    //Echo("//multi gunwo: l: ", l);
+	For( k:=1, k <= lSize, k := k+1 ) [
+		ForEach(i, l[k]) [
+			//Echo("multi gunwo: i", i);
+			uc := UniqueConstant();
+			DestructiveAppend(csl[k], {uc, i});
+			e := Subst(UnList(i), uc) e;
+		];
+	];
+
+    {csl, e};
+];

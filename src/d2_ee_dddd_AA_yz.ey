@@ -1,0 +1,13 @@
+#include "gto_d2_kit/d2_ee_dddd_AA_yz.hpp"
+#include <cmath>
+/*
+<?
+Use("emit_single_eri_d2.ys");
+?>
+*/
+namespace { 
+    const double Pi = M_PI;
+}
+//<?
+EmitSingleD2ERI( 2 , 2 , 2 , 2 , {1 , 1} , {2,3 } ); 
+//?>

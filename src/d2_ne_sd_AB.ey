@@ -1,0 +1,13 @@
+#include "gto_d2_kit/d2_ne_sd_AB.hpp"
+#include <cmath>
+/*
+<?
+	Use("emit_ne_d2.ys");
+?>
+*/
+namespace {
+    const double Pi = M_PI;
+}
+//<?
+EmitVneSecondDerivative(0,2, {1 , 2});
+//?>

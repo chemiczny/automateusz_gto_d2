@@ -1,0 +1,77 @@
+TransformCart2Herm(_i, _j, _a, _b, _xa, _xb)<--Cartesian2Hermitian(i, j, i+j, a, b, xa, xb);
+
+10 # Cartesian2Hermitian(_i, _j, 0, _a, _b, _xa, _xb) <-- [
+	Cart2HermExpCoeff(i, j, 0, a, b, xa-xb)* ( holdHermitianGaussian @ {0, a, b, xa, xb} );
+];
+
+20 # Cartesian2Hermitian(_i, _j, _t, _a, _b, _xa, _xb) <-- [
+	Cart2HermExpCoeff(i, j, t, a, b, xa-xb)*( holdHermitianGaussian @ {t, a, b, xa, xb} )+Cartesian2Hermitian(i, j, t-1, a, b, xa, xb);
+];
+
+0 # HermitianGaussian(_t, _a, _b, _xa, _xb)_(t<0) <--[
+	0;
+];
+
+10 # HermitianGaussian(0, _a, _b, _xa, _xb) <--[
+	p := a+b;
+	Xp:=(a*xa+b*xb)/(a+b);
+	Exp(-p*(x-Xp)^2);
+];
+
+20 # HermitianGaussian(_t, _a, _b, _xa, _xb) <--[
+	p := a+b;
+	Xp:=(a*xa+b*xb)/(a+b);
+	2*p*((x-Xp)*HermitianGaussian(t-1, a, b, xa, xb)-(t-1)*HermitianGaussian(t-2, a, b, xa, xb));
+];
+
+0 # Cart2HermExpCoeff(0, 0, 0, _a, _b, _xab) <-- Exp(-a*b/(a+b) *xab^2);
+
+10 # Cart2HermExpCoeff(_i, _j, _t, _a, _b, _xab)_( t < 0 Or j < 0 Or i <0) <-- 0;
+
+20 # Cart2HermExpCoeff(_i, _j, _t, _a, _b, _xab)_( t > i+j) <-- 0;
+
+30 # Cart2HermExpCoeff(_i, 0, _t, _a, _b, _xab)_( t>0) <-- [
+	Local(p);
+	p:=a+b;
+	((2*p)^-t)*Bin(i, t) * Cart2HermExpCoeff(i-t, 0, 0, a, b, xab);
+];
+
+30 # Cart2HermExpCoeff(0, _j, _t, _a, _b, _xab)_( t>0 ) <-- [
+	Local(p);
+	p:=a+b;
+	((2*p)^-t)*Bin(j, t) * Cart2HermExpCoeff(0, j-t, 0, a, b, xab);
+];
+
+40 # Cart2HermExpCoeff(_i, _j, 0, _a, _b, _xab)_( i>=j ) <-- [
+	Local(p, Xpa);
+	Xpa:=-b/(a+b)*xab;
+	p:=a+b;
+	Xpa*Cart2HermExpCoeff(i-1, j, 0, a, b, xab) +1/(2*p)* ((i-1)* Cart2HermExpCoeff(i-2, j, 0, a, b, xab) + j*Cart2HermExpCoeff(i-1, j-1, 0, a, b, xab));
+];
+
+40 # Cart2HermExpCoeff(_i, _j, 0, _a, _b, _xab)_( j>i ) <-- [
+	Local(p, Xpb);
+	Xpb:=a/(a+b)*xab;
+	p:=a+b;
+	Xpb*Cart2HermExpCoeff(i, j-1, 0, a, b, xab) +1/(2*p)* (i* Cart2HermExpCoeff(i-1, j-1, 0, a, b, xab) + (j-1)*Cart2HermExpCoeff(i, j-2, 0, a, b, xab));
+];
+
+50 # Cart2HermExpCoeff(_i, _j, _t, _a, _b, _xab)_( i>=j ) <-- [
+	Local(p, Xpa);
+	Xpa:=-b/(a+b)*xab;
+	p:=a+b;
+	Xpa*Cart2HermExpCoeff(i-1, j, t, a, b, xab) +1/(2*p)* ((i-1)* Cart2HermExpCoeff(i-2, j, t, a, b, xab) + j*Cart2HermExpCoeff(i-1, j-1, t, a, b, xab)+Cart2HermExpCoeff(i-1, j, t-1, a, b, xab));
+];
+
+50 # Cart2HermExpCoeff(_i, _j, _t, _a, _b, _xab)_( j>i ) <-- [
+	Local(p, Xpb);
+	Xpb:=a/(a+b)*xab;
+	p:=a+b;
+	Xpb*Cart2HermExpCoeff(i, j-1, t, a, b, xab) +1/(2*p)* (i* Cart2HermExpCoeff(i-1, j-1, t, a, b, xab) + (j-1)*Cart2HermExpCoeff(i, j-2, t, a, b, xab)+Cart2HermExpCoeff(i, j-1, t-1, a, b, xab));
+];
+
+500 # Cart2HermExpCoeff(_i, _j, _t, _a, _b, _xab) <-- [
+	Local(p);
+	p:=a+b;
+	1/(2*p*t) * (i* Cart2HermExpCoeff(i-1, j, t-1, a, b, xab) + j*Cart2HermExpCoeff(i, j-1, t-1, a, b, xab));
+];

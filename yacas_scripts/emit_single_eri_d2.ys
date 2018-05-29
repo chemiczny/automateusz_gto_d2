@@ -1,0 +1,449 @@
+Use("hessian_two_electrons_coulomb.ys");
+Use("cse.ys");
+Use("cpp_form.ys");
+Use("shells.ys");
+Use("cartesian_to_spherical.ys");
+
+MaxEvalDepth(100000);
+    
+10 # DeepCopy(l_IsList) <-- [
+    Local(r);
+    r := {};
+    ForEach(e, l)
+        DestructiveAppend(r, DeepCopy(e));
+    r;
+];
+
+20 # DeepCopy(_e) <-- e;
+
+UnProtect( FillList );
+Retract(FillList, 2);
+
+10 # FillList(_item, 0) <-- {};
+
+20 # FillList(_item, length_IsPositiveInteger) <-- [
+    Local(i, result);
+    result := {};
+    For(i:=0, i < length, i++)
+        DestructiveInsert(result, 1, DeepCopy(item));
+    result;
+];
+
+Listify(a_IsAtom) <-- a;
+UnList(a_IsAtom) <-- a;
+
+TopologicalSort'Kahn(V_IsList, E_IsList) <-- [
+    Local(n, A, I, S, L, e, v, i, av, R);
+
+    n := Length(V);
+
+    // initialize adjacency list
+    A := FillList({}, n);
+    ForEach (e, E)
+        DestructiveAppend(A[e[1]], e[2]);
+
+    // initialize in-degree list
+    I := FillList(0, n);
+    ForEach (e, Transpose(E)[2])
+        I[e] := I[e] + 1;
+
+    // find nodes with no incoming edges
+    S := {};
+    ForEach (i, 1 .. n)
+        If (I[i] = 0, DestructiveAppend(S, i));
+
+    // sort
+    L := {};
+    While (Length(S) != 0) [
+        v := Head(S);
+        S := Tail(S);
+        DestructiveAppend(L, v);
+        ForEach (av, A[v]) [
+            I[av] := I[av] - 1;
+            If (I[av] = 0, DestructiveAppend(S, av));
+        ];
+    ];
+
+    Check(Length(L) = Length(V), "topological sort: cycle detected");
+
+    // translate the result
+    For (i := 1, i <= n, i++)
+        DestructiveReplace(L, i, V[L[i]]);
+
+    L;
+];
+
+
+EmitSingleD2ERI(_l1, _l2, _l3, _l4, _o, _dcoords ) <-- [
+   If (l1 + l2 + l3 + l4 > 5, [
+        Echo("#pragma GCC optimize (\"O1\")");
+        Echo("#pragma GCC optimize (\"no-expensive-optimizations\")");
+        Echo("#pragma GCC optimize (\"no-unit-at-a-time\")");
+    ]);
+    Echo(" ");
+    Echo("void second_derivative_ee_" : CppForm(l1) : CppForm(l2) : CppForm(l3) : CppForm(l4) : "_" : CppForm(o[1]): CppForm(o[2]) : "_" : CppForm(dcoords[1]) : CppForm(dcoords[2]): "(");
+    Echo("    const double ae,");
+    Echo("    const double xA,");
+    Echo("    const double yA,");
+    Echo("    const double zA,");
+    Echo("    const double be,");
+    Echo("    const double xB,");
+    Echo("    const double yB,");
+    Echo("    const double zB,");
+    Echo("    const double ce,");
+    Echo("    const double xC,");
+    Echo("    const double yC,");
+    Echo("    const double zC,");
+    Echo("    const double de,");
+    Echo("    const double xD,");
+    Echo("    const double yD,");
+    Echo("    const double zD,");
+    Echo("    const double* const bs,");
+    Echo("    double* const d2ee)");
+    Echo("{");
+
+    nc1 := (l1 + 1) * (l1 + 2) / 2;
+    nc2 := (l2 + 1) * (l2 + 2) / 2;
+    nc3 := (l3 + 1) * (l3 + 2) / 2;
+    nc4 := (l4 + 1) * (l4 + 2) / 2;
+
+    ns1 := 2 * l1 + 1;
+    ns2 := 2 * l2 + 1;
+    ns3 := 2 * l3 + 1;
+    ns4 := 2 * l4 + 1;
+
+    Local(i,j,k,l, csl, ints, derivE, d2r2, dr2, r2, h, g, extract);
+
+    Echo("    const double p = ae + be;");
+    Echo("    const double q = ce + de;");
+
+    Echo("    const double xP = (ae * xA + be * xB) / p;");
+    Echo("    const double yP = (ae * yA + be * yB) / p;");
+    Echo("    const double zP = (ae * zA + be * zB) / p;");
+
+    Echo("    const double xQ = (ce * xC + de * xD) / q;");
+    Echo("    const double yQ = (ce * yC + de * yD) / q;");
+    Echo("    const double zQ = (ce * zC + de * zD) / q;");
+
+    postfixes := {"x", "y", "z"};
+
+    g := FillList(FillList(FillList(FlatCopy(FillList(0, nc4)), nc3), nc2), nc1);
+    //gs := FillList(FillList(FillList(FillList(FlatCopy(FillList(0, 9)), ns4), ns3), ns2), ns1);
+    
+    csl := {};
+    ints := {};
+    derivE := {};
+    d2r2 := {};
+    dr2 := {};
+    r2 := {};
+    h := {};
+
+    //components := { {1,1}, {1,2}, {1,3}, {2, 1}, {2,2}, {2,3}, {3, 1}, {3,2}, {3,3} };
+    d2result := "d2ee";
+    //numOfCases:=9;
+
+    i := 1;
+    ForEach(m1, Shells[l1 + 1]) [
+        j := 1;
+        ForEach(m2, Shells[l2 + 1]) [
+            k := 1;
+            ForEach(m3, Shells[l3 + 1]) [
+                l := 1;
+                ForEach(m4, Shells[l4 + 1]) [
+                    //caseIt := 1;
+                    //ForEach( caseInd , components) [
+  
+                        args := {"HoldERI", "holdDerivE", "holdD2R2e", "holdDR2el", "holdR",  m1, ae, m2, be, {xA, yA, zA}, {xB, yB, zB},m3, ce, 
+                             m4, de, {xC, yC, zC}, {xD, yD, zD}, p, q, bs, {xP, yP, zP}, {xQ, yQ, zQ},
+                             dcoords, o};
+
+                        //wywolanie funkcji liczacej pochodne
+                        h := (hessian'coulomb'twoelectrons'part @ args);
+                        
+                        //znajduje wspolczynniki cart2herm, ktore juz sie pojawily
+
+                        h := CSE'SubstituteTaggedSubexpressions(ints, h); 
+                        h := CSE'SubstituteTaggedSubexpressions(derivE, h);
+                        h := CSE'SubstituteTaggedSubexpressions(d2r2, h);
+                        h := CSE'SubstituteTaggedSubexpressions(dr2, h);
+                        h := CSE'SubstituteTaggedSubexpressions(r2, h);
+                        
+                        {extract, h} := CSE'ExtractMulti(h, {"HoldERI", "holdDerivE",  "holdR",  "holdDR2el", "holdD2R2e" } ); 
+
+                        ints := Concat(ints, extract[1]);
+                        derivE := Concat( derivE, extract[2] );
+                        d2r2 := Concat( d2r2, extract[5] );
+                        dr2 := Concat( dr2, extract[4] );
+                        r2 := Concat( r2, extract[3] );
+                        
+                        //znajduje wyrazenia proste, ktore juz sie pojawily
+                        h := CSE'SubstituteTaggedSubexpressions(csl, h);
+                        
+                        {h, t} := CSE(h);
+
+                        csl := Concat(csl, t);
+
+                        g[i][j][k][l] := h;
+                        //caseIt := caseIt + 1;
+                   // ];
+                    l := l + 1;
+                ];
+                k := k + 1;
+            ];
+            j := j + 1;
+        ];
+        i := i + 1;
+    ];
+
+   // #########derivE########################
+    For (i := 1, i <= Length(derivE), i++) [
+        s := Eval("DerivE" @ Tail(derivE[i][2]));
+        s := CSE'SubstituteTaggedSubexpressions(ints, s);
+        {new'ints, s} := CSE'Extract( s, "HoldERI" );
+        ints := Concat( ints, new'ints );
+        s := CSE'SubstituteTaggedSubexpressions(csl, s);
+        {s, c} := CSE(s);
+        csl := Concat(csl, c);
+        DestructiveReplace(derivE, i, {derivE[i][1], s});
+    ];
+    
+    i := 1;
+    While (i <= Length(derivE)) [
+        t := derivE[i];
+        c := t[1];
+        v := t[2];
+        If (IsAtom(v), [
+            g := Subst(c, v) g;
+            csl := Subst(c, v) csl;
+            DestructiveDelete(derivE, i);
+        ], [
+            DestructiveReplace(derivE, i, {c, Listify(v)});
+            i := i + 1;
+        ]);
+    ];
+    csl := Concat( csl, derivE);
+    
+    //###################d2r2#############################
+    For (i := 1, i <= Length(d2r2), i++) [
+        s := Eval("d2R2e" @ Tail(d2r2[i][2]));
+
+        s := CSE'SubstituteTaggedSubexpressions(csl, s);
+        {s, c} := CSE(s);
+        csl := Concat(csl, c);
+        DestructiveReplace(d2r2, i, {d2r2[i][1], s});
+    ];
+    i := 1;
+    While (i <= Length(d2r2)) [
+        t := d2r2[i];
+        c := t[1];
+        v := t[2];
+        If (IsAtom(v), [
+            g := Subst(c, v) g;
+            csl := Subst(c, v) csl;
+            DestructiveDelete(d2r2, i);
+        ], [
+            DestructiveReplace(d2r2, i, {c, Listify(v)});
+            i := i + 1;
+        ]);
+    ];
+    csl := Concat( csl, d2r2);
+    
+    //#######################dr2##############################
+
+    For (i := 1, i <= Length(dr2), i++) [
+        s := Eval("dR2el" @ Tail(dr2[i][2]));
+
+        s := CSE'SubstituteTaggedSubexpressions(csl, s);
+        {s, c} := CSE(s);
+        csl := Concat(csl, c);
+        DestructiveReplace(dr2, i, {dr2[i][1], s});
+    ];
+
+    i := 1;
+    While (i <= Length(dr2)) [
+        t := dr2[i];
+        c := t[1];
+        v := t[2];
+        If (IsAtom(v), [
+            g := Subst(c, v) g;
+            csl := Subst(c, v) csl;
+            DestructiveDelete(dr2, i);
+        ], [
+            DestructiveReplace(dr2, i, {c, Listify(v)});
+            i := i + 1;
+        ]);
+    ];
+    csl := Concat( csl, dr2);
+
+    //########################r2##############################
+
+    For (i := 1, i <= Length(r2), i++) [
+        s := Eval("R" @ Tail(r2[i][2]));
+
+        s := CSE'SubstituteTaggedSubexpressions(csl, s);
+        {s, c} := CSE(s);
+        csl := Concat(csl, c);
+        DestructiveReplace(r2, i, {r2[i][1], s});
+    ];
+
+    i := 1;
+    While (i <= Length(r2)) [
+        t := r2[i];
+        c := t[1];
+        v := t[2];
+        If (IsAtom(v), [
+            g := Subst(c, v) g;
+            csl := Subst(c, v) csl;
+            DestructiveDelete(r2, i);
+        ], [
+            DestructiveReplace(r2, i, {c, Listify(v)});
+            i := i + 1;
+        ]);
+    ];
+    csl := Concat( csl, r2);
+    //#######################Cart2Herm#######################
+    herms := {};
+
+    For (i := 1, i <= Length(ints), i++) [
+        s := Eval("Cart2HermExpCoeff" @ Tail(ints[i][2]));
+        
+        s := CSE'SubstituteTaggedSubexpressions(herms, s);
+        {new'herms, s} := CSE'Extract( s, "holdHermitianGaussian" );
+        herms := Concat( herms, new'herms );
+        
+        s := CSE'SubstituteTaggedSubexpressions(csl, s);
+        {s, c} := CSE(s);
+        csl := Concat(csl, c);
+        DestructiveReplace(ints, i, {ints[i][1], s});
+    ];
+
+    ints := CSE'SubstituteTaggedSubexpressions(csl, ints);
+    {ints, c} := CSE(ints);
+    csl := Concat(csl, c);
+    
+    i := 1;
+    While (i <= Length(ints)) [
+        t := ints[i];
+        c := t[1];
+        v := t[2];
+        If (IsAtom(v), [
+            g := Subst(c, v) g;
+            csl := Subst(c, v) csl;
+            DestructiveDelete(ints, i);
+        ], [
+            DestructiveReplace(ints, i, {c, Listify(v)});
+            i := i + 1;
+        ]);
+    ];
+    
+    csl := Concat(csl, ints);
+    
+    //#######################herms#######################
+
+    For (i := 1, i <= Length(herms), i++) [
+        s := Eval("HermitianGaussian" @ Tail(herms[i][2]));
+        
+        s := CSE'SubstituteTaggedSubexpressions(csl, s);
+        {s, c} := CSE(s);
+        csl := Concat(csl, c);
+        DestructiveReplace(herms, i, {herms[i][1], s});
+    ];
+
+    herms := CSE'SubstituteTaggedSubexpressions(csl, herms);
+    {herms, c} := CSE(herms);
+    csl := Concat(csl, c);
+    
+    i := 1;
+    While (i <= Length(herms)) [
+        t := herms[i];
+        c := t[1];
+        v := t[2];
+        If (IsAtom(v), [
+            g := Subst(c, v) g;
+            csl := Subst(c, v) csl;
+            DestructiveDelete(herms, i);
+        ], [
+            DestructiveReplace(herms, i, {c, Listify(v)});
+            i := i + 1;
+        ]);
+    ];
+    
+    csl := Concat(csl, herms);
+    //#################Koniec###############################3
+
+    //g := CSE'SubstituteTaggedSubexpressions(csl, g);
+    //{g, c} := CSE(g);
+    //csl := Concat(csl, c);
+
+    edges := {};
+    //keys := Transpose(csl)[1];
+    keys := Association'Create();
+    t:= Transpose(csl)[1];
+    ForEach(i, 1 .. Length(t))
+        Association'Set(keys, t[i], i);
+    
+    ForEach (i, 1 .. Length(csl)) [
+        vars := VarList(Eval(UnList(csl[i][2])));
+
+        ForEach (var, vars) [
+            j := Association'Get(keys, var);
+            //j := Find(keys, var);
+            If (j > 0, DestructiveAppend(edges, {j, i}));
+        ];
+
+    ];
+
+    //Echo("//Do sortowania topologicznego wchodzi: csl", csl);
+    //Echo("//Do sortowania topologicznego wchodzi: edges ", edges);
+
+    csl := TopologicalSort'Kahn(csl, edges);
+
+    //Echo("//Z sortowania topologicznego wychodzi: csl ", csl);
+    //Echo("//Czas: sortowanie topologiczne: ",time8);
+
+    ForEach(d, CSE'EmitDefinitions(CSE'GenerateAssignments(csl)))
+            WriteString("    " : d : Nl());
+    
+    A1 := CartesianToSphericalMatrix[l1 + 1];
+    A2 := CartesianToSphericalMatrix[l2 + 1];
+    A3 := CartesianToSphericalMatrix[l3 + 1];
+    A4 := CartesianToSphericalMatrix[l4 + 1];
+
+    resultWritten := 0;
+
+    For(i' := 0, i' < 2 * l1 + 1, i'++) [
+        For(j' := 0, j' < 2 * l2 + 1, j'++) [
+            For(k' := 0, k' < 2 * l3 + 1, k'++) [
+                For(l' := 0, l' < 2 * l4 + 1, l'++) [
+                    newResult := 0;
+                    For(i := 0, i < (l1 + 1) * (l1 + 2) / 2, i++) [
+                        If ( Not IsZero(N(A1[i'+1][i+1])),
+                            For(j := 0, j < (l2 + 1) * (l2 + 2) / 2, j++) [
+                                If ( Not IsZero(N(A2[j'+1][j+1] )) ,
+                                    For(k := 0, k < (l3 + 1) * (l3 + 2) / 2, k++) [
+                                        If ( Not IsZero(N(A3[k'+1][k+1] )) ,
+                                            For(l := 0, l < (l4 + 1) * (l4 + 2) / 2, l++) [
+
+                                                a := A1[i'+1][i+1] * A2[j'+1][j+1] * A3[k'+1][k+1] * A4[l'+1][l+1];
+
+                                                a := N(a);
+                                                If (Not IsZero(a),
+                                                    newResult := newResult + a * g[i + 1][j + 1][k + 1][l + 1]
+                                                );
+                                            ]
+                                        );
+                                    ]
+                                );
+                            ]
+                        );
+                    ];
+                        WriteString("    ":d2result:"[" : String(resultWritten) : "] += " : CppForm(newResult) : ";" : Nl());
+                    resultWritten := resultWritten+1;
+                ];
+            ];
+        ];
+    ];
+    
+    
+    Echo("}");
+];

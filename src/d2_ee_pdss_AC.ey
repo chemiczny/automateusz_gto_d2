@@ -1,0 +1,13 @@
+#include "gto_d2_kit/d2_ee_pdss_AC.hpp"
+#include <cmath>
+/*
+<?
+Use("emit_eri_d2.ys");
+?>
+*/
+namespace { 
+    const double Pi = M_PI;
+}
+//<?
+EmitD2ERI( 1 , 2 , 0 , 0 , {1 , 3 } ); 
+//?>

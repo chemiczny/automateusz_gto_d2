@@ -1,0 +1,32 @@
+#include "gto_d2_kit/d2_overlap.hpp"
+
+#include <cmath>
+
+#include <boost/math/special_functions/gamma.hpp>
+
+/*
+<?
+    Use("hessian_overlap_herm.ys");
+    Use("Cart2Herm.ys");
+    Use("emit_oe_d2_herm.ys");
+?>
+*/
+
+namespace {
+    const double Pi = M_PI;
+}
+
+    //<?
+    EmitSecondDerivative(overlap, 0, 0);
+    EmitSecondDerivative(overlap, 0, 1);
+    EmitSecondDerivative(overlap, 0, 2);
+
+    EmitSecondDerivative(overlap, 1, 0);
+    EmitSecondDerivative(overlap, 1, 1);
+    EmitSecondDerivative(overlap, 1, 2);
+    
+    EmitSecondDerivative(overlap, 2, 0);
+    EmitSecondDerivative(overlap, 2, 1);
+    EmitSecondDerivative(overlap, 2, 2);
+    //?>
+

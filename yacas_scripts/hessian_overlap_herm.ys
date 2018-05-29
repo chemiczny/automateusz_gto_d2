@@ -1,0 +1,11 @@
+Use("overlap_gradient_herm.ys");
+Use("Cart2Herm.ys");
+
+overlap'hessian'element(_s ,_i, _a, _j, _b, _xab, _gaussInd, _xyz) <-- [
+	Local(e);
+	e:={0, 0, 0};
+	e[xyz[1] ] := e[xyz[1]]+1;
+	e[xyz[2] ] := e[xyz[2]]+1;
+	If( gaussInd[1] + gaussInd[2] = 3, -1, 1)*
+	HermDerivative(s, i, j, a, b, xab, e);
+];

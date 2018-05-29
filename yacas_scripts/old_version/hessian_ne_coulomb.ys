@@ -1,0 +1,204 @@
+Use("Cart2Herm.ys");
+Use("d2R_one_electron.ys");
+Use("overlap_gradient_herm.ys");
+
+hessian'necoulombherm'part(_subst, _ma, _aa, _mb, _ab, _xA, _xB, _xC, _bs, {3, 3}, _coordInd) <--[
+	Local(out, Pc, t, tIt, u, uIt, v, vIt, secondSum, firstSum);
+	out:=0;
+	Pc:=(aa*xA+ab*xB)/(aa+ab)-xC;
+
+	
+	t:=ma[1]+mb[1];
+	For( tIt:=0, tIt<= t, tIt++ )[
+		u:=ma[2]+mb[2];
+		secondSum:=0;
+		For( uIt:=0, uIt<=u, uIt++)[
+			firstSum:=0;
+			v:=ma[3]+mb[3];
+			For( vIt:=0, vIt<=v, vIt++)[
+				firstSum:= firstSum + (subst @{ma[3], mb[3], vIt, aa, ab, xA[3]-xB[3]})*
+					d2R1e(aa, ab, tIt, uIt, vIt, aa+ab, Pc, bs, 0, coordInd, {3,3});
+			];
+			secondSum:= secondSum + firstSum*(subst @{ma[2], mb[2], uIt, aa, ab, xA[2]-xB[2]});
+		];
+		out:= out + secondSum*( subst @{ma[1], mb[1], tIt, aa, ab, xA[1]-xB[1]});
+	];
+
+	out:=2*Pi*out/(aa+ab);
+
+	out;
+];
+
+hessian'necoulombherm'part(_subs,_ma, _aa, _mb, _ab, _xA, _xB, _xC, _bs, _gaussInd, _coordInd)_(gaussInd[1] = 3 And gaussInd[2] != 3) <--[
+	Local(out, Pc, tuv, component, tInd, t, tIt, uInd, u, secondSum, uIt, vInd, v, firstSum, vIt);
+	out:=0;
+	Pc:=(aa*xA+ab*xB)/(aa+ab)-xC;
+	tuv:= {0,0,0};
+	component:=coordInd[2];	
+
+	tInd:=(component)%3+1;
+	t:=ma[tInd]+mb[tInd];
+	For( tIt:=0, tIt<= t, tIt++ )[
+		tuv[tInd]:=tIt;
+		uInd:=(component+1)%3+1;
+		u:=ma[uInd]+mb[uInd];
+		secondSum:=0;
+		For( uIt:=0, uIt<=u, uIt++)[
+			tuv[uInd]:=uIt;
+			vInd:=component;
+			firstSum:=0;
+			v:=ma[vInd]+mb[vInd];
+			For( vIt:=0, vIt<=v, vIt++)[
+				tuv[vInd]:=vIt;
+				firstSum:= firstSum +
+					If(gaussInd[2] = 1, 1, -1)*
+					DerivE(subs, ma[vInd], mb[vInd], aa, ab, xA[vInd]-xB[vInd],vIt, 1)*
+					dR1e(aa, ab, tuv[1],tuv[2], tuv[3],aa+ab, Pc, bs, 0, coordInd[1], gaussInd[1])+
+					( subs @ {ma[vInd], mb[vInd], vIt, aa, ab, xA[vInd]-xB[vInd]})
+					*d2R1e(aa, ab, tuv[1],tuv[2], tuv[3],aa+ab, Pc, bs, 0, coordInd, gaussInd);
+			];
+			secondSum:= secondSum + firstSum*( subs @ {ma[uInd], mb[uInd], uIt, aa, ab, xA[uInd]-xB[uInd]});
+		];
+		out:= out + secondSum*( subs @ {ma[tInd], mb[tInd], tIt, aa, ab, xA[tInd]-xB[tInd]});
+	];
+
+	out:=2*Pi*out/(aa+ab);
+
+	out;
+];
+
+hessian'necoulombherm'part(_subs,_ma, _aa, _mb, _ab, _xA, _xB, _xC, _bs, _gaussInd, _coordInd)_(gaussInd[1] != 3 And gaussInd[2] = 3) <--[
+	Local(out, Pc, tuv, component, tInd, t, tIt, uInd, u, secondSum, uIt, vInd, firstSum, v, vIt);	
+	out:=0;
+	Pc:=(aa*xA+ab*xB)/(aa+ab)-xC;
+	tuv:= {0,0,0};
+	component:=coordInd[1];	
+
+	tInd:=(component)%3+1;
+	t:=ma[tInd]+mb[tInd];
+	For( tIt:=0, tIt<= t, tIt++ )[
+		tuv[tInd]:=tIt;
+		uInd:=(component+1)%3+1;
+		u:=ma[uInd]+mb[uInd];
+		secondSum:=0;
+		For( uIt:=0, uIt<=u, uIt++)[
+			tuv[uInd]:=uIt;
+			vInd:=component;
+			firstSum:=0;
+			v:=ma[vInd]+mb[vInd];
+			For( vIt:=0, vIt<=v, vIt++)[
+				tuv[vInd]:=vIt;
+				firstSum:= firstSum +
+					If(gaussInd[1] = 1, 1, -1)*
+					DerivE(subs, ma[vInd], mb[vInd], aa, ab, xA[vInd]-xB[vInd],vIt, 1)*
+					dR1e(aa, ab, tuv[1],tuv[2], tuv[3],aa+ab, Pc, bs, 0, coordInd[2], gaussInd[2])+
+					( subs @ {ma[vInd], mb[vInd], vIt, aa, ab, xA[vInd]-xB[vInd]})
+					*d2R1e(aa, ab, tuv[1],tuv[2], tuv[3],aa+ab, Pc, bs, 0, coordInd, gaussInd);
+			];
+			secondSum:= secondSum + firstSum*( subs @ {ma[uInd], mb[uInd], uIt, aa, ab, xA[uInd]-xB[uInd]});
+		];
+		out:= out + secondSum*( subs @ {ma[tInd], mb[tInd], tIt, aa, ab, xA[tInd]-xB[tInd]});
+	];
+
+	out:=2*Pi*out/(aa+ab);
+
+	out;
+];
+
+hessian'necoulombherm'part(_subs,_ma, _aa, _mb, _ab, _xA, _xB, _xC, _bs, _gaussInd, _coordInd)_(gaussInd[1] != 3 And gaussInd[2] != 3 And
+												 coordInd[1] = coordInd[2]) <--[
+	Local(out, Pc, tuv, component, tInd, t, tIt, uInd, u, secondSum, uIt, vInd, firstSum, v, vIt);	
+	out:=0;
+	Pc:=(aa*xA+ab*xB)/(aa+ab)-xC;
+	tuv:= {0,0,0};
+	component:=coordInd[1];	
+
+	tInd:=(component)%3+1;
+	t:=ma[tInd]+mb[tInd];
+	For( tIt:=0, tIt<= t, tIt++ )[
+		tuv[tInd]:=tIt;
+		uInd:=(component+1)%3+1;
+		u:=ma[uInd]+mb[uInd];
+		secondSum:=0;
+		For( uIt:=0, uIt<=u, uIt++)[
+			tuv[uInd]:=uIt;
+			vInd:=component;
+			firstSum:=0;
+			v:=ma[vInd]+mb[vInd];
+			For( vIt:=0, vIt<=v, vIt++)[
+				tuv[vInd]:=vIt;
+				firstSum:= firstSum +
+					If(gaussInd[1] + gaussInd[2] != 3, 1, -1)*
+					DerivE(subs, ma[vInd], mb[vInd], aa, ab, xA[vInd]-xB[vInd],vIt, 2)*
+					R(tuv[1],tuv[2], tuv[3],  aa+ab, Pc, bs, 0)+
+
+					If(gaussInd[1] = 1, 1, -1)*
+					DerivE(subs, ma[vInd], mb[vInd], aa, ab, xA[vInd]-xB[vInd],vIt, 1)*
+					dR1e(aa, ab, tuv[1],tuv[2], tuv[3],aa+ab, Pc, bs, 0, coordInd[2], gaussInd[2])+
+
+					If(gaussInd[2] = 1, 1, -1)*
+					DerivE(subs, ma[vInd], mb[vInd], aa, ab, xA[vInd]-xB[vInd],vIt, 1)*
+					dR1e(aa, ab, tuv[1],tuv[2], tuv[3],aa+ab, Pc, bs, 0, coordInd[1], gaussInd[1])+
+
+					( subs @ {ma[vInd], mb[vInd], vIt, aa, ab, xA[vInd]-xB[vInd]})
+					*d2R1e(aa, ab, tuv[1],tuv[2], tuv[3],aa+ab, Pc, bs, 0, coordInd, gaussInd);
+			];
+			secondSum:= secondSum + firstSum*( subs @ {ma[uInd], mb[uInd], uIt, aa, ab, xA[uInd]-xB[uInd]});
+		];
+		out:= out + secondSum*( subs @ {ma[tInd], mb[tInd], tIt, aa, ab, xA[tInd]-xB[tInd]});
+	];
+
+	out:=2*Pi*out/(aa+ab);
+
+	out;
+];
+
+hessian'necoulombherm'part(_subs,_ma, _aa, _mb, _ab, _xA, _xB, _xC, _bs, _gaussInd, _coordInd)_(gaussInd[1] != 3 And gaussInd[2] != 3 And
+												 coordInd[1] != coordInd[2]) <--[
+	Local(out, Pc, tuv, tInd, t, tIt, uInd, u, secondSum, uIt, vInd, firstSumA, firstSumB, v, vIt);
+	out:=0;
+	Pc:=(aa*xA+ab*xB)/(aa+ab)-xC;
+	tuv:= {0,0,0};
+
+	tInd:=6-coordInd[1]-coordInd[2];
+	t:=ma[tInd]+mb[tInd];
+	For( tIt:=0, tIt<= t, tIt++ )[
+		tuv[tInd]:=tIt;
+		uInd:=coordInd[1];
+		u:=ma[uInd]+mb[uInd];
+		secondSum:=0;
+		For( uIt:=0, uIt<=u, uIt++)[
+			tuv[uInd]:=uIt;
+			vInd:=coordInd[2];
+			firstSumA:=0;
+			firstSumB:=0;
+			v:=ma[vInd]+mb[vInd];
+			For( vIt:=0, vIt<=v, vIt++)[
+				tuv[vInd]:=vIt;
+				firstSumA:= firstSumA +
+					If( gaussInd[2] = 1, 1, -1)*
+					DerivE(subs, ma[vInd], mb[vInd], aa, ab, xA[vInd]-xB[vInd],vIt, 1)*
+					R(tuv[1],tuv[2], tuv[3],  aa+ab, Pc, bs, 0)+
+
+					( subs @ {ma[vInd], mb[vInd], vIt, aa, ab, xA[vInd]-xB[vInd]})*
+					dR1e(aa, ab, tuv[1],tuv[2], tuv[3],aa+ab, Pc, bs, 0, coordInd[2], gaussInd[2]);
+
+				firstSumB:= firstSumB +
+					If(gaussInd[2] = 1, 1, -1)*
+					DerivE(subs, ma[vInd], mb[vInd], aa, ab, xA[vInd]-xB[vInd],vIt, 1)*
+					dR1e(aa, ab, tuv[1],tuv[2], tuv[3],aa+ab, Pc, bs, 0, coordInd[1], gaussInd[1])+
+
+					( subs @ {ma[vInd], mb[vInd], vIt, aa, ab, xA[vInd]-xB[vInd]})
+					*d2R1e(aa, ab, tuv[1],tuv[2], tuv[3],aa+ab, Pc, bs, 0, coordInd, gaussInd);
+			];
+			secondSum:= secondSum +
+				firstSumA*If( gaussInd[1] = 1, 1, -1)*DerivE(subs, ma[uInd], mb[uInd], aa, ab, xA[uInd]-xB[uInd],uIt, 1)+
+				 firstSumB*( subs @ {ma[uInd], mb[uInd], uIt, aa, ab, xA[uInd]-xB[uInd]});
+		];
+		out:= out + secondSum*( subs @ {ma[tInd], mb[tInd], tIt, aa, ab, xA[tInd]-xB[tInd]});
+	];
+
+	out:=2*Pi*out/(aa+ab);
+
+	out;
+];

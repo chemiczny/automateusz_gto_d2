@@ -1,0 +1,77 @@
+Use("boys_derivative.ys");
+
+10 # dRax(_a, _b, _t, _u, _v, _p, _pc, _bs, _n, _coordInd)_( t < 0 Or u < 0 Or v < 0 Or n < 0) <-- 0;
+
+50 # dRax(_a, _b, 0, 0, 0, _p, _pc, _bs, _n, _coordInd) <-- [
+	-2*a*pc[coordInd]*bs[n+1]*(-2*p)^n;
+];
+
+100 # dRax(_a, _b,_t, _u, _v, _p, _pc, _bs, _n, _coordInd)_( t > 0 ) <-- [
+	If ( coordInd = 1 ,
+	(t-1)*dRax(a, b,t-2, u, v, p, pc, bs, n+1, coordInd)+pc[1]*dRax(a, b,t-1, u, v, p, pc, bs, n+1, coordInd)+
+	a/(a+b)*R(t-1, u, v, p, pc, bs, n+1) , 
+	(t-1)*dRax(a, b,t-2, u, v, p, pc, bs, n+1, coordInd)+pc[1]*dRax(a, b,t-1, u, v, p, pc, bs, n+1, coordInd));
+];
+
+100 # dRax(_a, _b,_t, _u, _v, _p, _pc, _bs, _n, _coordInd)_( u > 0 ) <-- [
+	If ( coordInd = 2 ,
+	(u-1)*dRax(a, b,t, u-2, v, p, pc, bs, n+1, coordInd)+pc[2]*dRax(a, b,t, u-1, v, p, pc, bs, n+1, coordInd)+a/(a+b)*R(t, u-1, v, p, pc, bs, n+1),
+	(u-1)*dRax(a, b,t, u-2, v, p, pc, bs, n+1, coordInd)+pc[2]*dRax(a, b,t, u-1, v, p, pc, bs, n+1, coordInd));
+];
+
+100 # dRax(_a, _b,_t, _u, _v, _p, _pc, _bs, _n, _coordInd)_( v > 0 ) <-- [
+	If ( coordInd = 3 ,
+	(v-1)*dRax(a, b,t, u, v-2, p, pc, bs, n+1, coordInd)+pc[3]*dRax(a, b,t, u, v-1, p, pc, bs, n+1, coordInd)+a/(a+b)*R(t, u, v-1, p, pc, bs, n+1),
+	(v-1)*dRax(a, b,t, u, v-2, p, pc, bs, n+1, coordInd)+pc[3]*dRax(a, b,t, u, v-1, p, pc, bs, n+1, coordInd));
+];
+
+
+10 # dRbx(_a, _b, _t, _u, _v, _p, _pc, _bs, _n, _coordInd)_( t < 0 Or u < 0 Or v < 0 Or n < 0) <-- 0;
+
+50 # dRbx(_a, _b, 0, 0, 0, _p, _pc, _bs, _n, _coordInd) <-- [
+	-2*b*pc[coordInd]*bs[n+1]*(-2*p)^n;
+];
+
+100 # dRbx(_a, _b,_t, _u, _v, _p, _pc, _bs, _n, _coordInd)_( t > 0 ) <-- [
+	If ( coordInd = 1 ,
+	(t-1)*dRbx(a, b,t-2, u, v, p, pc, bs, n+1, coordInd)+pc[1]*dRbx(a, b,t-1, u, v, p, pc, bs, n+1, coordInd)+
+	b/(a+b)*R(t-1, u, v, p, pc, bs, n+1) , 		
+	(t-1)*dRbx(a, b,t-2, u, v, p, pc, bs, n+1, coordInd)+pc[1]*dRbx(a, b,t-1, u, v, p, pc, bs, n+1, coordInd));
+];
+
+100 # dRbx(_a, _b,_t, _u, _v, _p, _pc, _bs, _n, _coordInd)_( u > 0 ) <-- [
+	If ( coordInd = 2 ,
+	(u-1)*dRbx(a, b,t, u-2, v, p, pc, bs, n+1, coordInd)+pc[2]*dRbx(a, b,t, u-1, v, p, pc, bs, n+1, coordInd)+b/(a+b)*R(t, u-1, v, p, pc, bs, n+1),
+	(u-1)*dRbx(a, b,t, u-2, v, p, pc, bs, n+1, coordInd)+pc[2]*dRbx(a, b,t, u-1, v, p, pc, bs, n+1, coordInd));
+];
+
+100 # dRbx(_a, _b,_t, _u, _v, _p, _pc, _bs, _n, _coordInd)_( v > 0 ) <-- [
+	If ( coordInd = 3 ,
+	(v-1)*dRbx(a, b,t, u, v-2, p, pc, bs, n+1, coordInd)+pc[3]*dRbx(a, b,t, u, v-1, p, pc, bs, n+1, coordInd)+b/(a+b)*R(t, u, v-1, p, pc, bs, n+1),
+	(v-1)*dRbx(a, b,t, u, v-2, p, pc, bs, n+1, coordInd)+pc[3]*dRbx(a, b,t, u, v-1, p, pc, bs, n+1, coordInd));
+];
+
+10 # dRcx(_a, _b, _t, _u, _v, _p, _pc, _bs, _n, _coordInd)_( t < 0 Or u < 0 Or v < 0 Or n < 0) <-- 0;
+
+50 # dRcx(_a, _b, 0, 0, 0, _p, _pc, _bs, _n, _coordInd) <-- [
+	2*p*pc[coordInd]*bs[n+1]*(-2*p)^n;
+];
+
+100 # dRcx(_a, _b,_t, _u, _v, _p, _pc, _bs, _n, _coordInd)_( t > 0 ) <-- [
+	If ( coordInd = 1 ,
+	(t-1)*dRcx(a, b,t-2, u, v, p, pc, bs, n+1, coordInd)+pc[1]*dRcx(a, b,t-1, u, v, p, pc, bs, n+1, coordInd)-R(t-1, u, v, p, pc, bs, n+1) , 		
+	(t-1)*dRcx(a, b,t-2, u, v, p, pc, bs, n+1, coordInd)+pc[1]*dRcx(a, b,t-1, u, v, p, pc, bs, n+1, coordInd));
+];
+
+100 # dRcx(_a, _b,_t, _u, _v, _p, _pc, _bs, _n, _coordInd)_( u > 0 ) <-- [
+	If ( coordInd = 2 ,
+	(u-1)*dRcx(a, b,t, u-2, v, p, pc, bs, n+1, coordInd)+pc[2]*dRcx(a, b,t, u-1, v, p, pc, bs, n+1, coordInd)-R(t, u-1, v, p, pc, bs, n+1),
+	(u-1)*dRcx(a, b,t, u-2, v, p, pc, bs, n+1, coordInd)+pc[2]*dRcx(a, b,t, u-1, v, p, pc, bs, n+1, coordInd));
+];
+
+100 # dRcx(_a, _b,_t, _u, _v, _p, _pc, _bs, _n, _coordInd)_( v > 0 ) <-- [
+	If ( coordInd = 3 ,
+	(v-1)*dRcx(a, b,t, u, v-2, p, pc, bs, n+1, coordInd)+pc[3]*dRcx(a, b,t, u, v-1, p, pc, bs, n+1, coordInd)-R(t, u, v-1, p, pc, bs, n+1),
+	(v-1)*dRcx(a, b,t, u, v-2, p, pc, bs, n+1, coordInd)+pc[3]*dRcx(a, b,t, u, v-1, p, pc, bs, n+1, coordInd));
+];
+

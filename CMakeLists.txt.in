@@ -1,0 +1,8 @@
+cmake_minimum_required (VERSION 3.5)
+
+project (LIBGTO_D2_KIT VERSION @PROJECT_VERSION@ LANGUAGES CXX)
+
+set (SRCS @GENERATED_SRCS@ @CPP_TO_COPY@)
+
+include_directories (include)
+add_library (gto_d2_kit ${SRCS})

@@ -1,0 +1,83 @@
+Use("dPQ.ys");
+Use("two_electrons_gradient_R.ys");
+
+10 # d2R2e(_a, _b, _c, _d, _t, _u, _v, _alpha, _pq, _bs, _n, _coordInd, _gaussInd)_( t < 0 Or u < 0 Or v < 0 Or n < 0) <-- 0;
+
+50 # d2R2e(_a, _b, _c, _d, 0, 0, 0, _alpha, _pq, _bs, _n, _coordInd, _gaussInd) <-- [
+	If( coordInd[1] = coordInd[2],
+	 dPQ(a, b, c, d, gaussInd[1])*dPQ(a, b, c, d, gaussInd[2])* (bs[n+1]*(-2*alpha)^(n+1) + pq[ coordInd[1]]^2 * bs[n+2]*(-2*alpha)^(n+2)),
+	pq[ coordInd[1]] * pq[ coordInd[2]] * dPQ(a, b, c, d, gaussInd[1]) * dPQ(a, b, c, d, gaussInd[2])*bs[n+2]*(-2*alpha)^(n+2));
+];
+
+100 # d2R2e(_a, _b, _c, _d, _t, _u, _v, _alpha, _pq, _bs, _n, _coordInd, _gaussInd)_( t > 0 And coordInd[1] != 1 And coordInd[2] != 1 ) <-- [
+	(t-1)*d2R2e(a, b, c, d, t-2, u, v, alpha, pq, bs, n+1, coordInd, gaussInd)
+	+pq[1]*d2R2e(a, b, c, d, t-1, u, v, alpha, pq, bs, n+1, coordInd, gaussInd);
+];
+
+100 # d2R2e(_a, _b, _c, _d, _t, _u, _v, _alpha, _pq, _bs, _n, _coordInd, _gaussInd)_( t > 0 And coordInd[1] = 1 And coordInd[2] != 1 ) <-- [
+	(t-1)*d2R2e(a, b, c, d, t-2, u, v, alpha, pq, bs, n+1, coordInd, gaussInd)
+	+dPQ(a, b, c, d, gaussInd[1])*dR2el(a, b, c, d, t-1, u, v, alpha, pq, bs, n+1, gaussInd[2], coordInd[2])+
+	pq[1]*d2R2e(a, b, c, d, t-1, u, v, alpha, pq, bs, n+1, coordInd, gaussInd);
+];
+
+100 # d2R2e(_a, _b, _c, _d, _t, _u, _v, _alpha, _pq, _bs, _n, _coordInd, _gaussInd)_( t > 0 And coordInd[1] != 1 And coordInd[2] = 1 ) <-- [
+	(t-1)*d2R2e(a, b, c, d, t-2, u, v, alpha, pq, bs, n+1, coordInd, gaussInd)
+	+dPQ(a, b, c, d, gaussInd[2])*dR2el(a, b, c, d ,t-1, u, v, alpha, pq, bs, n+1, gaussInd[1], coordInd[1])+
+	pq[1]*d2R2e(a, b, c, d, t-1, u, v, alpha, pq, bs, n+1, coordInd, gaussInd);
+];
+
+100 # d2R2e(_a, _b, _c, _d, _t, _u, _v, _alpha, _pq, _bs, _n, _coordInd, _gaussInd)_( t > 0 And coordInd[1] = 1 And coordInd[2] = 1 ) <-- [
+	(t-1)*d2R2e(a, b, c, d,t-2, u, v, alpha, pq, bs, n+1, coordInd, gaussInd)+
+	dPQ(a, b, c, d, gaussInd[1])*dR2el(a, b, c, d,t-1, u, v, alpha, pq, bs, n+1, gaussInd[2], coordInd[2])+
+	dPQ(a, b, c, d, gaussInd[2])*dR2el(a, b, c, d,t-1, u, v, alpha, pq, bs, n+1, gaussInd[1], coordInd[1])+
+	pq[1]*d2R2e(a, b, c, d, t-1, u, v, alpha, pq, bs, n+1, coordInd, gaussInd);
+];
+
+100 # d2R2e(_a, _b, _c, _d, _t, _u, _v, _alpha, _pq, _bs, _n, _coordInd, _gaussInd)_( u > 0 And coordInd[1] != 2 And coordInd[2] != 2 ) <-- [
+	(u-1)*d2R2e(a, b, c, d, t, u-2, v, alpha, pq, bs, n+1, coordInd, gaussInd)
+	+pq[2]*d2R2e(a, b, c, d, t, u-1, v, alpha, pq, bs, n+1, coordInd, gaussInd);
+];
+
+100 # d2R2e(_a, _b, _c, _d, _t, _u, _v, _alpha, _pq, _bs, _n, _coordInd, _gaussInd)_( u > 0 And coordInd[1] = 2 And coordInd[2] != 2 ) <-- [
+	(u-1)*d2R2e(a, b, c, d, t, u-2, v, alpha, pq, bs, n+1, coordInd, gaussInd)
+	+dPQ(a, b, c, d, gaussInd[1])*dR2el(a, b, c, d, t, u-1, v, alpha, pq, bs, n+1, gaussInd[2], coordInd[2])+
+	pq[2]*d2R2e(a, b, c, d, t, u-1, v, alpha, pq, bs, n+1, coordInd, gaussInd);
+];
+
+100 # d2R2e(_a, _b, _c, _d, _t, _u, _v, _alpha, _pq, _bs, _n, _coordInd, _gaussInd)_( u > 0 And coordInd[1] != 2 And coordInd[2] = 2 ) <-- [
+	(u-1)*d2R2e(a, b, c, d, t, u-2, v, alpha, pq, bs, n+1, coordInd, gaussInd)
+	+dPQ(a, b, c, d, gaussInd[2])*dR2el(a, b, c, d, t, u-1, v, alpha, pq, bs, n+1, gaussInd[1], coordInd[1])+
+	pq[2]*d2R2e(a, b, c, d, t, u-1, v, alpha, pq, bs, n+1, coordInd, gaussInd);
+];
+
+100 # d2R2e(_a, _b, _c, _d, _t, _u, _v, _alpha, _pq, _bs, _n, _coordInd, _gaussInd)_( u > 0 And coordInd[1] = 2 And coordInd[2] = 2 ) <-- [
+	(u-1)*d2R2e(a, b, c, d, t, u-2, v, alpha, pq, bs, n+1, coordInd, gaussInd)+
+	dPQ(a, b, c, d, gaussInd[1])*dR2el(a, b, c, d, t, u-1, v, alpha, pq, bs, n+1, gaussInd[2], coordInd[2])+
+	dPQ(a, b, c, d, gaussInd[2])*dR2el(a, b, c, d, t, u-1, v, alpha, pq, bs, n+1, gaussInd[1], coordInd[1])+
+	pq[2]*d2R2e(a, b, c, d, t, u-1, v, alpha, pq, bs, n+1, coordInd, gaussInd);
+];
+
+100 # d2R2e(_a, _b, _c, _d, _t, _u, _v, _alpha, _pq, _bs, _n, _coordInd, _gaussInd)_( v > 0 And coordInd[1] != 3 And coordInd[2] != 3 ) <-- [
+	(v-1)*d2R2e(a, b, c, d,t, u, v-2, alpha, pq, bs, n+1, coordInd, gaussInd)
+	+pq[3]*d2R2e(a, b, c, d, t, u, v-1, alpha, pq, bs, n+1, coordInd, gaussInd);
+];
+
+100 # d2R2e(_a, _b, _c, _d, _t, _u, _v, _alpha, _pq, _bs, _n, _coordInd, _gaussInd)_( v > 0 And coordInd[1] = 3 And coordInd[2] != 3 ) <-- [
+	(v-1)*d2R2e(a, b, c, d, t, u, v-2, alpha , pq, bs, n+1, coordInd, gaussInd)
+	+dPQ(a, b, c, d, gaussInd[1])*dR2el(a, b, c, d, t, u, v-1, alpha , pq, bs, n+1, gaussInd[2], coordInd[2])+
+	pq[3]*d2R2e(a, b, c, d, t, u, v-1, alpha , pq, bs, n+1, coordInd, gaussInd);
+];
+
+100 # d2R2e(_a, _b, _c, _d, _t, _u, _v, _alpha, _pq, _bs, _n, _coordInd, _gaussInd)_( v > 0 And coordInd[1] != 3 And coordInd[2] = 3 ) <-- [
+	(v-1)*d2R2e(a, b, c, d, t, u, v-2, alpha, pq, bs, n+1, coordInd, gaussInd)
+	+dPQ(a, b, c, d, gaussInd[2])*dR2el(a, b, c, d, t, u, v-1, alpha, pq, bs, n+1, gaussInd[1], coordInd[1])+
+	pq[3]*d2R2e(a, b, c, d, t, u, v-1, alpha, pq, bs, n+1, coordInd, gaussInd);
+];
+
+100 # d2R2e(_a, _b, _c, _d, _t, _u, _v, _alpha, _pq, _bs, _n, _coordInd, _gaussInd)_( v > 0 And coordInd[1] = 3 And coordInd[2] = 3 ) <-- [
+	(v-1)*d2R2e(a, b, c, d, t, u, v-2, alpha, pq, bs, n+1, coordInd, gaussInd)+
+	dPQ(a, b, c, d, gaussInd[1])*dR2el(a, b, c, d, t, u, v-1, alpha, pq, bs, n+1, gaussInd[2], coordInd[2])+
+	dPQ(a, b, c, d, gaussInd[2])*dR2el(a, b, c, d, t, u, v-1, alpha, pq, bs, n+1, gaussInd[1], coordInd[1])+
+	pq[3]*d2R2e(a, b, c, d, t, u, v-1, alpha, pq, bs, n+1, coordInd, gaussInd);
+];
+

@@ -1,0 +1,398 @@
+Use("d2R_two_electrons.ys");
+Use("Cart2Herm.ys");
+Use("overlap_gradient_herm.ys");
+
+hessian'coulomb'twoelectrons'part(_subs, _ijk, _aa, _lmn, _ab, _xA, _xB, _ijk2, _aa2, _lmn2, _ab2, _xC, _xD, _p, _q, _bs, _xP, _xQ, _coordInd, 	_gaussInd)
+	_( coordInd[1] = coordInd[2] And gaussInd[1] < 3 And gaussInd[2] < 3) <--[ 
+	
+	component:=coordInd[1];
+	tuv:= {0,0,0};
+	alpha:=p*q/(p+q);
+	out:=0;
+	t2:=ijk2[1]+lmn2[1];
+	For( tIt2:=0, tIt2<= t2, tIt2++ )[
+		u2:=ijk2[2]+lmn2[2];
+		Sum5th:=0;
+		For( uIt2:=0, uIt2<=u2, uIt2++)[
+			Sum4th:=0;
+			v2:=ijk2[3]+lmn2[3];
+			For( vIt2:=0, vIt2<=v2, vIt2++)[
+				Sum3rd:=0;
+				tInd:=(component)%3+1;
+				t:=ijk[tInd]+lmn[tInd];
+				For( tIt:=0, tIt<= t, tIt++ )[
+					tuv[tInd]:=tIt;
+					uInd:=(component+1)%3+1;
+					u:=ijk[uInd]+lmn[uInd];
+					Sum2nd:=0;
+					For( uIt:=0, uIt<=u, uIt++)[
+						tuv[uInd]:=uIt;
+						vInd:=component;
+						Sum1st:=0;
+						v:=ijk[vInd]+lmn[vInd];
+						For( vIt:=0, vIt<=v, vIt++)[
+							tuv[vInd]:=vIt;
+							Sum1st:= Sum1st + (-1)^(tIt2+uIt2+vIt2)*( 
+								If(gaussInd[1] + gaussInd[2] != 3, 1, -1)*
+								DerivE(subs, ijk[vInd], lmn[vInd], aa, ab, xA[vInd]-xB[vInd],vIt, 2)*
+								R(tuv[1]+tIt2,tuv[2]+uIt2, tuv[3]+vIt2,  alpha, xP-xQ, bs, 0)+
+
+								If(gaussInd[1] = 1, 1, -1)*
+								DerivE(subs, ijk[vInd], lmn[vInd], aa, ab, xA[vInd]-xB[vInd],vIt, 1)*
+								dR2el(aa, ab, aa2, ab2, tuv[1]+tIt2,tuv[2]+uIt2, tuv[3]+vIt2,alpha, xP-xQ, bs, 0,gaussInd[2], coordInd[2])+
+
+								If(gaussInd[2] = 1, 1, -1)*
+								DerivE(subs, ijk[vInd], lmn[vInd], aa, ab, xA[vInd]-xB[vInd],vIt, 1)*
+								dR2el(aa, ab, aa2, ab2, tuv[1]+tIt2,tuv[2]+uIt2, tuv[3]+vIt2,alpha, xP-xQ, bs, 0,gaussInd[1], coordInd[1])+
+
+								( subs @ {ijk[vInd], lmn[vInd], vIt, aa, ab, xA[vInd]-xB[vInd]})
+								*d2R2e(aa, ab, aa2, ab2, tuv[1]+tIt2,tuv[2]+uIt2, tuv[3]+vIt2,alpha, xP-xQ, bs, 0,coordInd, gaussInd));
+							);
+						];
+						Sum2nd:= Sum2nd + Sum1st*( subs @ {ijk[uInd], lmn[uInd], uIt, aa, ab, xA[uInd]-xB[uInd]} );
+					];
+					Sum3rd:= Sum3rd + Sum2nd*( subs @ {ijk[tInd], lmn[tInd], tIt, aa, ab, xA[tInd]-xB[tInd]} );
+				];
+				Sum4th:= Sum4th + Sum3rd*( subs @ {ijk2[3], lmn2[3], vIt2, aa2, ab2, xC[3]-xD[3]} );
+			];
+			Sum5th:= Sum5th + Sum4th*( subs @ {ijk2[2], lmn2[2], uIt2, aa2, ab2, xC[2]-xD[2]} );
+		];
+		out:= out + Sum5th*( subs @ {ijk2[1], lmn2[1], tIt2, aa2, ab2, xC[1]-xD[1]} );
+	];
+	out:=2*Pi^(2.5)*out/(p*q*Sqrt(p+q));
+	out;
+];
+
+hessian'coulomb'twoelectrons'part(_subs, _ijk, _aa, _lmn, _ab, _xA, _xB, _ijk2, _aa2, _lmn2, _ab2, _xC, _xD, _p, _q, _bs, _xP, _xQ, _coordInd, 	_gaussInd)
+	_( coordInd[1] = coordInd[2] And gaussInd[1] > 2 And gaussInd[2] > 2) <--[ 
+
+	component:=coordInd[1];
+	tuv2:= {0,0,0};
+	alpha:=p*q/(p+q);
+	out:=0;
+	t:=ijk[1]+lmn[1];
+	For( tIt:=0, tIt<= t, tIt++ )[
+		u:=ijk[2]+lmn[2];
+		Sum5th:=0;
+		For( uIt:=0, uIt<=u, uIt++)[
+			Sum4th:=0;
+			v:=ijk[3]+lmn[3];
+			For( vIt:=0, vIt<=v, vIt++)[
+				Sum3rd:=0;
+				tInd2:=(component)%3+1;
+				t2:=ijk2[tInd2]+lmn2[tInd2];
+				For( tIt2:=0, tIt2<= t2, tIt2++ )[
+					tuv2[tInd2]:=tIt2;
+					uInd2:=(component+1)%3+1;
+					u2:=ijk2[uInd2]+lmn2[uInd2];
+					Sum2nd:=0;
+					For( uIt2:=0, uIt2<=u2, uIt2++)[
+						tuv2[uInd2]:=uIt2;
+						vInd2:=component;
+						Sum1st:=0;
+						v2:=ijk2[vInd2]+lmn2[vInd2];
+						For( vIt2:=0, vIt2<=v2, vIt2++)[
+							tuv2[vInd2]:=vIt2;
+							Sum1st:= Sum1st + (-1)^(tIt2+uIt2+vIt2)*(
+								If(gaussInd[1] + gaussInd[2] != 7, 1, -1)*
+								DerivE(subs, ijk2[vInd2], lmn2[vInd2], aa2, ab2, xC[vInd2]-xD[vInd2],vIt2, 2)*
+								R(tuv2[1]+tIt,tuv2[2]+uIt, tuv2[3]+vIt,  alpha, xP-xQ, bs, 0)+
+
+								If(gaussInd[1] = 3, 1, -1)*
+								DerivE(subs, ijk2[vInd2], lmn2[vInd2], aa2, ab2, xC[vInd2]-xD[vInd2],vIt2, 1)*
+								dR2el(aa, ab, aa2, ab2, tuv2[1]+tIt,tuv2[2]+uIt, tuv2[3]+vIt,alpha, xP-xQ, bs, 0, gaussInd[2], coordInd[2])+
+
+								If(gaussInd[2] = 3, 1, -1)*
+								DerivE(subs, ijk2[vInd2], lmn2[vInd2], aa2, ab2, xC[vInd2]-xD[vInd2],vIt2, 1)*
+								dR2el(aa, ab, aa2, ab2, tuv2[1]+tIt,tuv2[2]+uIt, tuv2[3]+vIt,alpha, xP-xQ, bs, 0, gaussInd[1], coordInd[1])+
+
+								( subs @ {ijk2[vInd2], lmn2[vInd2], vIt2, aa2, ab2, xC[vInd2]-xD[vInd2]})
+								*d2R2e(aa, ab, aa2, ab2, tuv2[1]+tIt,tuv2[2]+uIt, tuv2[3]+vIt,alpha, xP-xQ, bs, 0, coordInd, gaussInd));
+							);
+						];
+						Sum2nd:= Sum2nd + Sum1st*( subs @ {ijk2[uInd2], lmn2[uInd2], uIt2, aa2, ab2, xC[uInd2]-xD[uInd2]} );
+					];
+					Sum3rd:= Sum3rd + Sum2nd*( subs @ {ijk2[tInd2], lmn2[tInd2], tIt2, aa2, ab2, xC[tInd2]-xD[tInd2]} );
+				];
+				Sum4th:= Sum4th + Sum3rd*( subs @ {ijk[3], lmn[3], vIt, aa, ab, xA[3]-xB[3]} );
+			];
+			Sum5th:= Sum5th + Sum4th*( subs @ {ijk[2], lmn[2], uIt, aa, ab, xA[2]-xB[2]} );
+		];
+		out:= out + Sum5th*( subs @ {ijk[1], lmn[1], tIt, aa, ab, xA[1]-xB[1]} );
+	];
+	out:=2*Pi^(2.5)*out/(p*q*Sqrt(p+q));
+	out;
+];
+
+hessian'coulomb'twoelectrons'part(_subs, _ijk, _aa, _lmn, _ab, _xA, _xB, _ijk2, _aa2, _lmn2, _ab2, _xC, _xD, _p, _q, _bs, _xP, _xQ, _coordInd, 	_gaussInd)
+	_( coordInd[1] != coordInd[2] And gaussInd[1] < 3  And gaussInd[2] < 3) <--[ 
+
+	tuv:= {0,0,0};
+	alpha:=p*q/(p+q);
+	out:=0;
+	t2:=ijk2[1]+lmn2[1];
+	For( tIt2:=0, tIt2<= t2, tIt2++ )[
+		u2:=ijk2[2]+lmn2[2];
+		Sum5th:=0;
+		For( uIt2:=0, uIt2<=u2, uIt2++)[
+			Sum4th:=0;
+			v2:=ijk2[3]+lmn2[3];
+			For( vIt2:=0, vIt2<=v2, vIt2++)[
+				Sum3rd:=0;
+				tInd:=6-coordInd[1]-coordInd[2];
+				t:=ijk[tInd]+lmn[tInd];
+				For( tIt:=0, tIt<= t, tIt++ )[
+					tuv[tInd]:=tIt;
+					uInd:=coordInd[1];
+					u:=ijk[uInd]+lmn[uInd];
+					Sum2nd:=0;
+					For( uIt:=0, uIt<=u, uIt++)[
+						tuv[uInd]:=uIt;
+						vInd:=coordInd[2];
+						Sum1stA:=0;
+						Sum1stB:=0;
+						v:=ijk[vInd]+lmn[vInd];
+						For( vIt:=0, vIt<=v, vIt++)[
+							tuv[vInd]:=vIt;
+							Sum1stA:= Sum1stA + (-1)^(tIt2+uIt2+vIt2)*( 
+								If(gaussInd[2] = 1, 1, -1)*
+								DerivE(subs, ijk[vInd], lmn[vInd], aa, ab, xA[vInd]-xB[vInd],vIt, 1)*
+								R(tuv[1]+tIt2,tuv[2]+uIt2, tuv[3]+vIt2,  alpha, xP-xQ, bs, 0)+
+
+								(subs @ {ijk[vInd], lmn[vInd], vIt, aa, ab, xA[vInd]-xB[vInd]})*
+								dR2el(aa, ab, aa2, ab2, tuv[1]+tIt2,tuv[2]+uIt2, tuv[3]+vIt2,alpha, xP-xQ, bs, 0, gaussInd[2], coordInd[2] ));
+
+							Sum1stB:= Sum1stB + (-1)^(tIt2+uIt2+vIt2)*(
+								If(gaussInd[2] = 1, 1, -1)*
+								DerivE(subs, ijk[vInd], lmn[vInd], aa, ab, xA[vInd]-xB[vInd],vIt, 1)*
+								dR2el(aa, ab, aa2, ab2, tuv[1]+tIt2,tuv[2]+uIt2, tuv[3]+vIt2,alpha, xP-xQ, bs, 0, gaussInd[1], coordInd[1] )+
+
+								(subs @ {ijk[vInd], lmn[vInd], vIt, aa, ab, xA[vInd]-xB[vInd]})*
+								d2R2e(aa, ab, aa2, ab2, tuv[1]+tIt2,tuv[2]+uIt2, tuv[3]+vIt2,alpha, xP-xQ, bs, 0, coordInd, gaussInd));
+							);
+						];
+						Sum2nd:= Sum2nd +
+							Sum1stA*If( gaussInd[1] = 1, 1, -1)*
+							DerivE(subs, ijk[uInd], lmn[uInd], aa, ab, xA[uInd]-xB[uInd],uIt, 1)+
+							 Sum1stB*( subs @ {ijk[uInd], lmn[uInd], uIt, aa, ab, xA[uInd]-xB[uInd]} );
+					];
+					Sum3rd:= Sum3rd + Sum2nd*( subs @ {ijk[tInd], lmn[tInd], tIt, aa, ab, xA[tInd]-xB[tInd]} );
+				];
+				Sum4th:= Sum4th + Sum3rd*( subs @ {ijk2[3], lmn2[3], vIt2, aa2, ab2, xC[3]-xD[3]} );
+			];
+			Sum5th:= Sum5th + Sum4th*( subs @ {ijk2[2], lmn2[2], uIt2, aa2, ab2, xC[2]-xD[2]} );
+		];
+		out:= out + Sum5th*( subs @ {ijk2[1], lmn2[1], tIt2, aa2, ab2, xC[1]-xD[1]} );
+	];
+	out:=2*Pi^(2.5)*out/(p*q*Sqrt(p+q));
+	out;
+];
+
+hessian'coulomb'twoelectrons'part(_subs, _ijk, _aa, _lmn, _ab, _xA, _xB, _ijk2, _aa2, _lmn2, _ab2, _xC, _xD, _p, _q, _bs, _xP, _xQ, _coordInd, 	_gaussInd)
+	_( coordInd[1] != coordInd[2] And gaussInd[1] > 2  And gaussInd[2] > 2) <--[
+	
+	tuv2:= {0,0,0};
+	alpha:=p*q/(p+q);
+	out:=0;
+	t:=ijk[1]+lmn[1];
+	For( tIt:=0, tIt<= t, tIt++ )[
+		u:=ijk[2]+lmn[2];
+		Sum5th:=0;
+		For( uIt:=0, uIt<=u, uIt++)[
+			Sum4th:=0;
+			v:=ijk[3]+lmn[3];
+			For( vIt:=0, vIt<=v, vIt++)[
+				Sum3rd:=0;
+				tInd2:=6- coordInd[1] - coordInd[2];
+				t2:=ijk2[tInd2]+lmn2[tInd2];
+				For( tIt2:=0, tIt2<= t2, tIt2++ )[
+					tuv2[tInd2]:=tIt2;
+					uInd2:=coordInd[1];
+					u2:=ijk2[uInd2]+lmn2[uInd2];
+					Sum2nd:=0;
+					For( uIt2:=0, uIt2<=u2, uIt2++)[
+						tuv2[uInd2]:=uIt2;
+						vInd2:=coordInd[2];
+						Sum1stA:=0;
+						Sum1stB:=0;
+						v2:=ijk2[vInd2]+lmn2[vInd2];
+						For( vIt2:=0, vIt2<=v2, vIt2++)[
+							tuv2[vInd2]:=vIt2;
+							Sum1stA:= Sum1stA + (-1)^(tIt2+uIt2+vIt2)*( 
+								If(gaussInd[2] = 3, 1, -1)*
+								DerivE(subs, ijk2[vInd2], lmn2[vInd2], aa2, ab2, xC[vInd2]-xD[vInd2],vIt2, 1)*
+								R(tuv2[1]+tIt,tuv2[2]+uIt, tuv2[3]+vIt,  alpha, xP-xQ, bs, 0)+
+
+								(subs @ {ijk2[vInd2], lmn2[vInd2], vIt2, aa2, ab2, xC[vInd2]-xD[vInd2]})*
+								dR2el(aa, ab, aa2, ab2, tuv2[1]+tIt,tuv2[2]+uIt, tuv2[3]+vIt,alpha, xP-xQ, bs, 0, gaussInd[2], coordInd[2]));
+
+							Sum1stB:= Sum1stB + (-1)^(tIt2+uIt2+vIt2)*(
+								If(gaussInd[2] = 3, 1, -1)*
+								DerivE(subs, ijk2[vInd2], lmn2[vInd2], aa2, ab2, xC[vInd2]-xD[vInd2],vIt2, 1)*
+								dR2el(aa, ab, aa2, ab2, tuv2[1]+tIt,tuv2[2]+uIt, tuv2[3]+vIt,alpha, xP-xQ, bs, 0, gaussInd[1], coordInd[1])+
+
+								(subs @ {ijk2[vInd2], lmn2[vInd2], vIt2, aa2, ab2, xC[vInd2]-xD[vInd2]})*
+								d2R2e(aa, ab, aa2, ab2, tuv2[1]+tIt,tuv2[2]+uIt, tuv2[3]+vIt,alpha, xP-xQ, bs, 0, coordInd, gaussInd));
+							);
+						];
+						Sum2nd:= Sum2nd +
+							Sum1stA*If( gaussInd[1] = 3, 1, -1)*
+							DerivE(subs, ijk2[uInd2], lmn2[uInd2], aa2, ab2, xC[uInd2]-xD[uInd2],uIt2, 1)+
+							 Sum1stB*( subs @ {ijk2[uInd2], lmn2[uInd2], uIt2, aa2, ab2, xC[uInd2]-xD[uInd2]} );
+					];
+					Sum3rd:= Sum3rd + Sum2nd*( subs @ {ijk2[tInd2], lmn2[tInd2], tIt2, aa2, ab2, xC[tInd2]-xD[tInd2]} );
+				];
+				Sum4th:= Sum4th + Sum3rd*( subs @ {ijk[3], lmn[3], vIt, aa, ab, xA[3]-xB[3]} );
+			];
+			Sum5th:= Sum5th + Sum4th*( subs @ {ijk[2], lmn[2], uIt, aa, ab, xA[2]-xB[2]} );
+		];
+		out:= out + Sum5th*( subs @ {ijk[1], lmn[1], tIt, aa, ab, xA[1]-xB[1]} );
+	];
+	out:=2*Pi^(2.5)*out/(p*q*Sqrt(p+q));
+	out;
+];
+
+hessian'coulomb'twoelectrons'part(_subs, _ijk, _aa, _lmn, _ab, _xA, _xB, _ijk2, _aa2, _lmn2, _ab2, _xC, _xD, _p, _q, _bs, _xP, _xQ, _coordInd, 	_gaussInd)
+	_( gaussInd[1] < 3  And gaussInd[2] > 2) <--[
+	component:=coordInd[1];
+	component2:=coordInd[2];
+	tuv:= {0,0,0};
+	tuv2:={0,0,0};
+	alpha:=p*q/(p+q);
+	out:=0;
+	tInd2:=(component2)%3+1;
+	t2:=ijk2[tInd2]+lmn2[tInd2];
+	For( tIt2:=0, tIt2<= t2, tIt2++ )[
+		tuv2[tInd2]:=tIt2;
+		uInd2:=(component2+1)%3+1;
+		u2:=ijk2[uInd2]+lmn2[uInd2];
+		Sum5th:=0;
+		For( uIt2:=0, uIt2<=u2, uIt2++)[
+			tuv2[uInd2]:=uIt2;
+			Sum4th:=0;
+			uInd:=(component+1)%3+1;
+			u:=ijk[uInd]+lmn[uInd];
+			For( uIt:=0, uIt<=u, uIt++)[
+				tuv[uInd]:=uIt;		
+				Sum3rd:=0;
+				tInd:=(component)%3+1;
+				t:=ijk[tInd]+lmn[tInd];
+				For( tIt:=0, tIt<= t, tIt++ )[
+					tuv[tInd]:=tIt;
+					Sum2nd:=0;
+					vInd2:=component2;
+					v2:=ijk2[vInd2]+lmn2[vInd2];
+					For( vIt2:=0, vIt2<=v2, vIt2++)[
+						tuv2[vInd2]:=vIt2;
+						vInd:=component;
+						Sum1stA:=0;
+						Sum1stB:=0;
+						v:=ijk[vInd]+lmn[vInd];
+						For( vIt:=0, vIt<=v, vIt++)[
+							tuv[vInd]:=vIt;
+							Sum1stA:= Sum1stA + (-1)^(tIt2+uIt2+vIt2)*( 
+								If(gaussInd[1] = 1, 1, -1)*
+								DerivE(subs, ijk[vInd], lmn[vInd], aa, ab, xA[vInd]-xB[vInd],vIt, 1)*
+								R(tuv[1]+tuv2[1],tuv[2]+tuv2[2], tuv[3]+tuv2[3],  alpha, xP-xQ, bs, 0)+
+
+								(subs @ {ijk[vInd], lmn[vInd], vIt, aa, ab, xA[vInd]-xB[vInd]})*
+								dR2el(aa, ab, aa2, ab2, tuv[1]+tuv2[1],tuv[2]+tuv2[2], tuv[3]+tuv2[3],alpha, xP-xQ, bs, 0, gaussInd[1], coordInd[1]));
+
+							Sum1stB:= Sum1stB + (-1)^(tIt2+uIt2+vIt2)*(
+								If(gaussInd[1] = 1, 1, -1)*
+								DerivE(subs, ijk[vInd], lmn[vInd], aa, ab, xA[vInd]-xB[vInd],vIt, 1)*
+								dR2el(aa, ab, aa2, ab2, tuv[1]+tuv2[1],tuv[2]+tuv2[2], tuv[3]+tuv2[3],alpha, xP-xQ, bs, 0, gaussInd[2], coordInd[2])+
+
+								(subs @ {ijk[vInd], lmn[vInd], vIt, aa, ab, xA[vInd]-xB[vInd]})*
+								d2R2e(aa, ab, aa2, ab2, tuv[1]+tuv2[1],tuv[2]+tuv2[2], tuv[3]+tuv2[3],alpha, xP-xQ, bs, 0, coordInd, gaussInd));
+							);
+
+						];
+						Sum2nd:= Sum2nd + 
+							Sum1stA*If( gaussInd[2] = 3, 1, -1)*
+							DerivE(subs, ijk2[vInd2], lmn2[vInd2], aa2, ab2, xC[vInd2]-xD[vInd2],vIt2, 1)+
+							 Sum1stB*(  subs @ {ijk2[vInd2], lmn2[vInd2], vIt2, aa2, ab2, xC[vInd2]-xD[vInd2]} );
+					];
+					Sum3rd:= Sum3rd + Sum2nd*( subs @ {ijk[tInd], lmn[tInd], tIt, aa, ab, xA[tInd]-xB[tInd]} );
+				];
+				Sum4th:= Sum4th + Sum3rd*( subs @ {ijk[uInd], lmn[uInd], uIt, aa, ab, xA[uInd]-xB[uInd]} );
+			];
+			Sum5th:= Sum5th + Sum4th*( subs @ {ijk2[uInd2], lmn2[uInd2], uIt2, aa2, ab2, xC[uInd2]-xD[uInd2]} );
+		];
+		out:= out + Sum5th*( subs @ {ijk2[tInd2], lmn2[tInd2], tIt2, aa2, ab2, xC[tInd2]-xD[tInd2]} );
+	];
+	out:=2*Pi^(2.5)*out/(p*q*Sqrt(p+q));
+	out;
+];
+
+hessian'coulomb'twoelectrons'part(_subs, _ijk, _aa, _lmn, _ab, _xA, _xB, _ijk2, _aa2, _lmn2, _ab2, _xC, _xD, _p, _q, _bs, _xP, _xQ, _coordInd, 	_gaussInd)
+	_( gaussInd[1] > 2  And gaussInd[2] < 3) <--[
+	component:=coordInd[1];
+	component2:=coordInd[2];
+	tuv:= {0,0,0};
+	tuv2:={0,0,0};
+	alpha:=p*q/(p+q);
+	out:=0;
+	tInd2:=(component2)%3+1;
+	t2:=ijk2[tInd2]+lmn2[tInd2];
+	For( tIt2:=0, tIt2<= t2, tIt2++ )[
+		tuv2[tInd2]:=tIt2;
+		uInd2:=(component2+1)%3+1;
+		u2:=ijk2[uInd2]+lmn2[uInd2];
+		Sum5th:=0;
+		For( uIt2:=0, uIt2<=u2, uIt2++)[
+			tuv2[uInd2]:=uIt2;
+			Sum4th:=0;
+			uInd:=(component+1)%3+1;
+			u:=ijk[uInd]+lmn[uInd];
+			For( uIt:=0, uIt<=u, uIt++)[
+				tuv[uInd]:=uIt;		
+				Sum3rd:=0;
+				tInd:=(component)%3+1;
+				t:=ijk[tInd]+lmn[tInd];
+				For( tIt:=0, tIt<= t, tIt++ )[
+					tuv[tInd]:=tIt;
+					Sum2nd:=0;
+					vInd2:=component2;
+					v2:=ijk2[vInd2]+lmn2[vInd2];
+					For( vIt2:=0, vIt2<=v2, vIt2++)[
+						tuv2[vInd2]:=vIt2;
+						vInd:=component;
+						Sum1stA:=0;
+						Sum1stB:=0;
+						v:=ijk[vInd]+lmn[vInd];
+						For( vIt:=0, vIt<=v, vIt++)[
+							tuv[vInd]:=vIt;
+							Sum1stA:= Sum1stA + (-1)^(tIt2+uIt2+vIt2)*( 
+								If(gaussInd[1] = 3, 1, -1)*
+								DerivE(subs, ijk[vInd], lmn[vInd], aa, ab, xA[vInd]-xB[vInd],vIt, 1)*
+								R(tuv[1]+tuv2[1],tuv[2]+tuv2[2], tuv[3]+tuv2[3], tuv[3]+tuv2[3],  alpha, xP-xQ, bs, 0)+
+
+								(subs @ {ijk[vInd], lmn[vInd], vIt, aa, ab, xA[vInd]-xB[vInd]})*
+								dR2el(aa, ab, aa2, ab2, tuv[1]+tuv2[1],tuv[2]+tuv2[2],alpha, xP-xQ, bs, 0, gaussInd[1], coordInd[1]));
+
+							Sum1stB:= Sum1stB + (-1)^(tIt2+uIt2+vIt2)*(
+								If(gaussInd[1] = 3, 1, -1)*
+								DerivE(subs, ijk[vInd], lmn[vInd], aa, ab, xA[vInd]-xB[vInd],vIt, 1)*
+								dR2el(aa, ab, aa2, ab2, tuv[1]+tIt2,tuv[2]+uIt2, tuv[3]+vIt2,alpha, xP-xQ, bs, 0, gaussInd[2], coordInd[2])+
+
+								(subs @ {ijk[vInd], lmn[vInd], vIt, aa, ab, xA[vInd]-xB[vInd]})*
+								d2R2e(aa, ab, aa2, ab2, tuv[1]+tIt2,tuv[2]+uIt2, tuv[3]+vIt2,alpha, xP-xQ, bs, 0, coordInd, gaussInd));
+							);
+						];
+						Sum2nd:= Sum2nd + 
+							Sum1stA*If( gaussInd[2] = 1, 1, -1)*
+							DerivE(subs, ijk2[vInd2], lmn2[vInd2], aa2, ab2, xC[vInd2]-xD[vInd2],vIt2, 1)+
+							 Sum1stB*(  subs @ {ijk2[vInd2], lmn2[vInd2], vIt2, aa2, ab2, xC[vInd2]-xD[vInd2]} );
+					];
+					Sum3rd:= Sum3rd + Sum2nd*( subs @ {ijk[tInd], lmn[tInd], tIt, aa, ab, xA[tInd]-xB[tInd]} );
+				];
+				Sum4th:= Sum4th + Sum3rd*( subs @ {ijk[uInd], lmn[uInd], uIt, aa, ab, xA[uInd]-xB[uInd]} );
+			];
+			Sum5th:= Sum5th + Sum4th*( subs @ {ijk2[uInd2], lmn2[uInd2], uIt2, aa2, ab2, xC[uInd2]-xD[uInd2]} );
+		];
+		out:= out + Sum5th*( subs @ {ijk2[tInd2], lmn2[tInd2], tIt2, aa2, ab2, xC[tInd2]-xD[tInd2]} );
+	];
+	out:=2*Pi^(2.5)*out/(p*q*Sqrt(p+q));
+	out;
+];

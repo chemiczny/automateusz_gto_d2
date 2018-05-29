@@ -1,0 +1,26 @@
+
+Shell's := RemoveDuplicates(Permutations({0,0,0}));
+Shell'p := RemoveDuplicates(Permutations({1,0,0}));
+Shell'd := RemoveDuplicates(Concat(Permutations({2,0,0}), 
+                                 Permutations({1,1,0})));
+Shell'f := RemoveDuplicates(Concat(Permutations({3,0,0}), 
+                                 Permutations({2,1,0}), 
+                                 Permutations({1,1,1})));
+Shell'g := RemoveDuplicates(Concat(Permutations({4,0,0}), 
+                                 Permutations({3,1,0}), 
+                                 Permutations({2,2,0}), 
+                                 Permutations({2,1,1})));
+Shell'h := RemoveDuplicates(Concat(Permutations({5,0,0}), 
+                                 Permutations({4,1,0}), 
+                                 Permutations({3,2,0}), 
+                                 Permutations({3,1,1}), 
+                                 Permutations({2,2,1})));
+Shell'i := RemoveDuplicates(Concat(Permutations({6,0,0}), 
+                                 Permutations({5,1,0}), 
+                                 Permutations({4,2,0}), 
+                                 Permutations({4,1,1}), 
+                                 Permutations({3,3,0}), 
+                                 Permutations({3,2,1}),
+                                 Permutations({2,2,2})));
+
+Shells := { Shell's, Shell'p, Shell'd, Shell'f, Shell'g, Shell'i };

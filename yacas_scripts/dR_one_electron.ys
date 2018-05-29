@@ -1,0 +1,9 @@
+Use("boys_derivative_px_ax_bx_cx.ys");
+
+dR1e(_a, _b, _t, _u, _v, _p, _pc, _bs, _n, _coordInd, _gaussInd) <--[
+	If(gaussInd = 1,
+		dRax(a, b, t, u, v, p, pc, bs, n, coordInd),
+	If(gaussInd = 2,
+		dRbx(a, b, t, u, v, p, pc, bs, n, coordInd),
+		dRcx(a, b, t, u, v, p, pc, bs, n, coordInd)));
+];

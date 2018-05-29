@@ -1,0 +1,17 @@
+10 # R( _t, _u, _v, _p, _pc, _bs, _n)_( t < 0 Or u < 0 Or v < 0 Or n < 0) <-- 0;
+
+50 # R( 0, 0, 0, _p, _pc, _bs, _n) <-- [
+	bs[n]*(-2*p)^n;
+];
+
+100 # R(_t, _u, _v, _p, _pc, _bs, _n)_( t > 0 ) <-- [
+	(t-1)*R(t-2, u, v, p, pc, bs, n+1)+pc[1]*R(t-1, u, v, p, pc, bs, n+1);
+];
+
+100 # R(_t, _u, _v, _p, _pc, _bs, _n)_( u > 0 ) <-- [
+	(u-1)*R(t, u-2, v, p, pc, bs, n+1)+pc[2]*R(t, u-1, v, p, pc, bs, n+1);
+];
+
+100 # R(_t, _u, _v, _p, _pc, _bs, _n)_( v > 0 ) <-- [
+	(v-1)*R(t, u, v-2, p, pc, bs, n+1)+pc[3]*R(t, u, v-1, p, pc, bs, n+1);
+];

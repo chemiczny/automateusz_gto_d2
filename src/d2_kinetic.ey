@@ -1,0 +1,32 @@
+#include "gto_d2_kit/d2_kinetic.hpp"
+
+#include <cmath>
+
+#include <boost/math/special_functions/gamma.hpp>
+
+
+/*
+<?
+    Use("hessian_kinetic_herm.ys");
+    Use("Cart2Herm.ys");
+    Use("emit_oe_d2_herm.ys");
+?>
+*/
+namespace {
+    const double Pi = M_PI;
+}
+
+    //<?
+    EmitSecondDerivative(kinetic, 0, 0);
+    EmitSecondDerivative(kinetic, 0, 1);
+    EmitSecondDerivative(kinetic, 0, 2);
+
+    EmitSecondDerivative(kinetic, 1, 0);
+    EmitSecondDerivative(kinetic, 1, 1);
+    EmitSecondDerivative(kinetic, 1, 2);
+    
+    EmitSecondDerivative(kinetic, 2, 0);
+    EmitSecondDerivative(kinetic, 2, 1);
+    EmitSecondDerivative(kinetic, 2, 2);
+    //?>
+

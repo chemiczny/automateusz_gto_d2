@@ -1,0 +1,81 @@
+Use("R_functions.ys");
+
+10 # dR2el(_a, _b, _c, _d, _t, _u, _v, _alpha, _pq, _bs, _n, _gaussInd, _coordInd)_( t < 0 Or u < 0 Or v < 0 Or n < 0) <-- 0;
+
+50 # dR2el(_a, _b, _c, _d, 0, 0, 0, _alpha, _pq, _bs, _n, _gaussInd, _coordInd) <-- [
+	If(gaussInd = 1,
+		a/(a+b)*pq[coordInd]*bs[n+1]*(-2*alpha)^(n+1),
+	If(gaussInd = 2,
+		b/(a+b)*pq[coordInd]*bs[n+1]*(-2*alpha)^(n+1),
+	If(gaussInd = 3 , 
+		-c/(c+d)*pq[coordInd]*bs[n+1]*(-2*alpha)^(n+1),
+		-d/(c+d)*pq[coordInd]*bs[n+1]*(-2*alpha)^(n+1))));
+];
+
+100 # dR2el(_a, _b, _c, _d, _t, _u, _v, _alpha, _pq, _bs, _n, _gaussInd, _coordInd)_( t > 0 ) <-- [
+	If ( coordInd = 1 ,
+		If(gaussInd = 1 ,
+			(t-1)*dR2el(a, b, c, d,t-2, u, v, alpha, pq, bs, n+1,gaussInd, coordInd)+
+			pq[1]*dR2el(a, b, c, d,t-1, u, v, alpha, pq, bs, n+1,gaussInd, coordInd)+
+			a/(a+b)*R(t-1, u, v, alpha, pq, bs, n+1) ,
+		If(gaussInd = 2 ,
+			(t-1)*dR2el(a, b, c, d,t-2, u, v, alpha, pq, bs, n+1,gaussInd, coordInd)+
+			pq[1]*dR2el(a, b, c, d,t-1, u, v, alpha, pq, bs, n+1,gaussInd, coordInd)+
+			b/(a+b)*R(t-1, u, v, alpha, pq, bs, n+1) ,
+		If(gaussInd = 3 ,
+			(t-1)*dR2el(a, b, c, d,t-2, u, v, alpha, pq, bs, n+1,gaussInd, coordInd)+
+			pq[1]*dR2el(a, b, c, d,t-1, u, v, alpha, pq, bs, n+1,gaussInd, coordInd)-
+			c/(c+d)*R(t-1, u, v, alpha, pq, bs, n+1) , 
+
+			(t-1)*dR2el(a, b, c, d,t-2, u, v, alpha, pq, bs, n+1,gaussInd, coordInd)+
+			pq[1]*dR2el(a, b, c, d,t-1, u, v, alpha, pq, bs, n+1,gaussInd, coordInd)-
+			d/(c+d)*R(t-1, u, v, alpha, pq, bs, n+1)))),
+	(t-1)*dR2el(a, b, c, d,t-2, u, v, alpha, pq, bs, n+1,gaussInd, coordInd)+pq[1]*dR2el(a, b, c, d,t-1, u, v, alpha, pq, bs, n+1,gaussInd, coordInd));
+];
+
+100 # dR2el(_a, _b, _c, _d, _t, _u, _v, _alpha, _pq, _bs, _n, _gaussInd, _coordInd)_( u > 0 ) <-- [
+	If ( coordInd = 2 ,
+		If(gaussInd = 1,
+			(u-1)*dR2el(a, b, c, d,t, u-2, v, alpha, pq, bs, n+1, gaussInd,coordInd)+
+			pq[2]*dR2el(a, b, c, d,t, u-1, v, alpha, pq, bs, n+1,gaussInd, coordInd)+
+			a/(a+b)*R(t, u-1, v, alpha, pq, bs, n+1),
+		If(gaussInd = 2,
+			(u-1)*dR2el(a, b, c, d,t, u-2, v, alpha, pq, bs, n+1, gaussInd,coordInd)+
+			pq[2]*dR2el(a, b, c, d,t, u-1, v, alpha, pq, bs, n+1,gaussInd, coordInd)+
+			b/(a+b)*R(t, u-1, v, alpha, pq, bs, n+1),
+		If(gaussInd = 3,
+			(u-1)*dR2el(a, b, c, d,t, u-2, v, alpha, pq, bs, n+1, gaussInd,coordInd)+
+			pq[2]*dR2el(a, b, c, d,t, u-1, v, alpha, pq, bs, n+1,gaussInd, coordInd)-
+			c/(c+d)*R(t, u-1, v, alpha, pq, bs, n+1),
+
+			(u-1)*dR2el(a, b, c, d,t, u-2, v, alpha, pq, bs, n+1, gaussInd,coordInd)+
+			pq[2]*dR2el(a, b, c, d,t, u-1, v, alpha, pq, bs, n+1,gaussInd, coordInd)-
+			d/(c+d)*R(t, u-1, v, alpha, pq, bs, n+1)))),
+	(u-1)*dR2el(a, b, c, d,t, u-2, v, alpha, pq, bs, n+1, gaussInd,coordInd)+pq[2]*dR2el(a, b, c, d, t, u-1, v, alpha, pq, bs, n+1, gaussInd,coordInd));
+];
+
+100 # dR2el(_a, _b, _c, _d, _t, _u, _v, _alpha, _pq, _bs, _n, _gaussInd, _coordInd)_( v > 0 ) <-- [
+	If ( coordInd = 3 ,
+		If( gaussInd = 1,
+			(v-1)*dR2el(a, b, c, d ,t, u, v-2, alpha, pq, bs, n+1,gaussInd, coordInd)+
+			pq[3]*dR2el(a, b,c, d,t, u, v-1, alpha, pq, bs, n+1,gaussInd, coordInd)+
+			a/(a+b)*R(t, u, v-1, alpha, pq, bs, n+1),
+		If( gaussInd = 2,
+			(v-1)*dR2el(a, b, c, d ,t, u, v-2, alpha, pq, bs, n+1,gaussInd, coordInd)+
+			pq[3]*dR2el(a, b,c, d,t, u, v-1, alpha, pq, bs, n+1,gaussInd, coordInd)+
+			b/(a+b)*R(t, u, v-1, alpha, pq, bs, n+1),
+		If( gaussInd = 3,
+			(v-1)*dR2el(a, b, c, d ,t, u, v-2, alpha, pq, bs, n+1,gaussInd, coordInd)+
+			pq[3]*dR2el(a, b,c, d,t, u, v-1, alpha, pq, bs, n+1,gaussInd, coordInd)-
+			c/(c+d)*R(t, u, v-1, alpha, pq, bs, n+1),
+
+			(v-1)*dR2el(a, b, c, d ,t, u, v-2, alpha, pq, bs, n+1,gaussInd, coordInd)+
+			pq[3]*dR2el(a, b,c, d,t, u, v-1, alpha, pq, bs, n+1,gaussInd, coordInd)-
+			d/(c+d)*R(t, u, v-1, alpha, pq, bs, n+1)))),
+	(v-1)*dR2el(a, b, c, d, t, u, v-2, alpha, pq, bs, n+1, gaussInd, coordInd)+pq[3]*dR2el(a, b, c, d, t, u, v-1, alpha, pq, bs, n+1, gaussInd,  coordInd));
+];
+
+
+
+
+

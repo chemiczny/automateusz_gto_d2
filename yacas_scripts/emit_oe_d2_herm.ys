@@ -1,0 +1,156 @@
+Use("cse.ys");
+Use("cpp_form.ys");
+Use("shells.ys");
+Use("cartesian_to_spherical.ys");
+
+EmitSecondDerivative(_prefix, _l1, _l2) <-- [
+    Echo("");
+    Echo("    // Automatically generated, do not edit");
+    Echo("    void " : String(prefix) : "_second_derivative_" : CppForm(l1) : CppForm(l2) : "(");
+    Echo("        double ae, double be, double cc,");
+    Echo("        double xAB, double yAB, double zAB,");
+    //Echo("        ublas::matrix<double>& hxx,");
+    //Echo("        ublas::matrix<double>& hxy,");
+    //Echo("        ublas::matrix<double>& hxz,");
+    //Echo("        ublas::matrix<double>& hyy,");
+    //Echo("        ublas::matrix<double>& hyz,");
+    //Echo("        ublas::matrix<double>& hzz,");
+    Echo("        double* const hxx,");
+    Echo("        double* const hxy,");
+    Echo("        double* const hxz,");
+    Echo("        double* const hyy,");
+    Echo("        double* const hyz,");
+    Echo("        double* const hzz,");
+    Echo("        bool same_atom,");
+    Echo("        std::size_t matrix_size, ");
+    Echo("        std::size_t Ai, std::size_t Bi)");
+    Echo("    {");
+
+    Local(c, d, csl, g, gs, nc1, nc2, ns1, ns2, m1, m2, ints, expanded'ints, ints'csl);
+	Local( components, d2result, numOfCases, component);	
+
+    nc1 := (l1 + 1) * (l1 + 2) / 2;
+    nc2 := (l2 + 1) * (l2 + 2) / 2;
+
+    ns1 := 2 * l1 + 1;
+    ns2 := 2 * l2 + 1;
+
+    g := {};
+    csl := {};
+    ints := {};
+    d := {};
+
+    components := { {1,1}, {1,2}, {1,3}, {2,2}, {2,3}, {3,3} };
+    d2result := {"hxx", "hxy", "hxz", "hyy", "hyz", "hzz"};
+    numOfCases:=6;
+
+    ForEach(m1, Shells[l1 + 1]) [
+        ForEach(m2, Shells[l2 + 1]) [
+            Local(new'ints, i, uc);
+            ForEach( component, components)[
+                d :=Append(d, (Atom(String(prefix) : "'hessian'element") 
+                    @ {"HoldS", m1, ae, m2, be, {xAB, yAB, zAB}, {1,1}, component}));
+            ];
+            // get rid of exponentials, their product is already present in cc
+            d := Eval(Subst(Exp(-(xAB^2.)*(ae*be)/(ae+be)), 1) d);
+            d := Eval(Subst(Exp(-(yAB^2.)*(ae*be)/(ae+be)), 1) d);
+            d := Eval(Subst(Exp(-(zAB^2.)*(ae*be)/(ae+be)), 1) d);
+
+            // substitute already found integrals
+            d := CSE'SubstituteTaggedSubexpressions(ints, d);
+
+            // extract new ones
+            new'ints := Listify /@ CSE'FindFuncCalls(d, "HoldS");
+            new'ints := RemoveDuplicates(new'ints);
+
+            // and keep them
+            ForEach(i, new'ints) [
+                uc := UniqueConstant();
+                DestructiveAppend(ints, {uc, i});
+                d := Subst(UnList(i), uc) d;
+            ];
+
+            d := CSE'SubstituteTaggedSubexpressions(csl, d);
+            {d, c} := CSE(d);
+            DestructiveAppend(g, d);
+            csl := Concat(csl, c); 
+			d :={};
+        ];
+    ];
+
+    expanded'ints := {};
+    ints'csl := {};
+
+    ForEach(i, ints) [
+        Local(s);
+        s := Eval("Cart2HermExpCoeff" @ Tail(i[2]));
+        // get rid of exponentials, their product is already present in cc
+        s := Eval(Subst(Exp(-(xAB^2.)*(ae*be)/(ae+be)), 1) s);
+        s := Eval(Subst(Exp(-(yAB^2.)*(ae*be)/(ae+be)), 1) s);
+        s := Eval(Subst(Exp(-(zAB^2.)*(ae*be)/(ae+be)), 1) s);
+        s := CSE'SubstituteTaggedSubexpressions(ints'csl, s);
+        {s, c} := CSE(s);
+        DestructiveAppend(expanded'ints, {i[1], s});
+        ints'csl := Concat(ints'csl, c);
+    ];
+
+    {expanded'ints, c} := CSE(expanded'ints);
+    ints'csl := Concat(ints'csl, c);
+
+    ints := {};
+
+    ForEach(i, expanded'ints)
+        If (IsAtom(i[2]), [
+            g := Subst(i[1], i[2]) g;
+            csl := Subst(i[1], i[2]) csl;
+        ], [
+            DestructiveAppend(ints, {i[1], Listify(i[2])});
+        ]);
+
+    csl := Concat(ints'csl, ints, csl);
+
+    g := CSE'SubstituteTaggedSubexpressions(csl, g);
+    {g, c} := CSE(g);
+    csl := Concat(csl, c);
+
+    ForEach(d, CSE'EmitDefinitions(CSE'GenerateAssignments(csl)))
+            WriteString("        " : d : Nl());
+    
+    For( caseInd:=1, caseInd <= numOfCases, caseInd++)[
+        For(m1 := 0, m1 < nc1, m1++) [
+            For(m2 := 0, m2 < nc2, m2++) [
+                Local(index, t, n, tag);
+                index := Concat(Shells[l1+1][m1+1], Shells[l2+1][m2+1]);
+                t := 10^Length(index);
+                For(n := 1, n <= Length(index), n++)
+                    t := t + Reverse(index)[n] * 10^(n-1);
+                v := ToString() Write(t);
+                tag := v[Length(v) - 5 .. Length(v)];
+                WriteString("        const double ":d2result[caseInd] : tag : " = " : CppForm(g[m1 * nc2 + m2 + 1][caseInd]) : ";" : Nl());
+            ];
+        ];
+     ];
+     Echo("		if( same_atom){");
+     For( caseInd:=1, caseInd <= numOfCases, caseInd++)[
+        gs := CartesianToSpherical(l1, l2, d2result[caseInd]);
+
+        For(m1 := 0, m1 < ns1, m1++) [
+            For(m2 := 0, m2 < ns2, m2++) [
+                Echo("        ":d2result[caseInd]:"[ (Ai +" : CppForm(m1) : ")*matrix_size + Bi + " : CppForm(m2) : "] += " : CppForm(cc * gs[m1+1][m2+1]) : ";");
+            ];
+        ];
+    ];
+    Echo("		}else{");
+
+    For( caseInd:=1, caseInd <= numOfCases, caseInd++)[
+    	 gs := CartesianToSpherical(l1, l2, d2result[caseInd]);
+        For(m1 := 0, m1 < ns1, m1++) [
+            For(m2 := 0, m2 < ns2, m2++) [
+                Echo("        ":d2result[caseInd]:"[ (Ai +" : CppForm(m1) : ")*matrix_size + Bi + " : CppForm(m2) : "] -= " : CppForm(cc * gs[m1+1][m2+1]) : ";");
+            ];
+        ];
+    ];
+    Echo("		}");
+    Echo("    }");
+];
+
