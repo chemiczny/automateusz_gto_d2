@@ -8,18 +8,21 @@ include_directories (
                      ${TEST_SOURCE_DIR}/src
                      ${Boost_INCLUDE_DIRS}
                      ${CMAKE_SOURCE_DIR}/include/gto_d2_kit
+		     /chata/mglanows/niedoida/automateusz/gto_d1_kit/build/gto_d1_kit/include
                      )
 add_definitions (-DBOOST_TEST_STATIC_LINK)
-add_executable (Test src/gto_d2_kit_test.cpp
+add_executable (gto_d2_kit_test src/gto_d2_kit_test.cpp
   src/overlap_test.cpp
   src/kinetic_test.cpp
   src/vne_test.cpp
-  src/vee_test.cpp)
+  #src/vee_test.cpp)
+  src/vee_test_numerical.cpp)
 
 add_test (NAME gto_d2_kit_test COMMAND gto_d2_kit_test)
 
 target_link_libraries (gto_d2_kit_test
 		       gto_d2_kit
+		       /chata/mglanows/niedoida/automateusz/gto_d1_kit/build/gto_d1_kit/build/libgto_d1_kit.a
                        ${Boost_FILESYSTEM_LIBRARY}
                        ${Boost_SYSTEM_LIBRARY}
                        ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
