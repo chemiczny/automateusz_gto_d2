@@ -2,6 +2,7 @@ Use("hessian_two_electrons_coulomb.ys");
 Use("cse.ys");
 Use("cpp_form.ys");
 Use("shells.ys");
+Use("emit_eri_utilities.ys");
 Use("cartesian_to_spherical.ys");
 
 MaxEvalDepth(100000);
@@ -72,7 +73,6 @@ TopologicalSort'Kahn(V_IsList, E_IsList) <-- [
 
     L;
 ];
-
 
 EmitD2ERI(_l1, _l2, _l3, _l4, _o) <-- [
    //If (l1 + l2 + l3 + l4 > 5, [
@@ -209,183 +209,204 @@ EmitD2ERI(_l1, _l2, _l3, _l4, _o) <-- [
     
    // #########derivE########################
 
-    For (i := 1, i <= Length(derivE), i++) [
-        s := Eval("DerivE" @ Tail(derivE[i][2]));
-        s := CSE'SubstituteTaggedSubexpressions(ints, s);
-        {new'ints, s} := CSE'Extract( s, "HoldERI" );
-        ints := Concat( ints, new'ints );
-        s := CSE'SubstituteTaggedSubexpressions(csl, s);
-        {s, c} := CSE(s);
-        csl := Concat(csl, c);
-        DestructiveReplace(derivE, i, {derivE[i][1], s});
-    ];
+    // For (i := 1, i <= Length(derivE), i++) [
+    //     s := Eval("DerivE" @ Tail(derivE[i][2]));
+    //     s := CSE'SubstituteTaggedSubexpressions(ints, s);
+    //     {new'ints, s} := CSE'Extract( s, "HoldERI" );
+    //     ints := Concat( ints, new'ints );
+    //     s := CSE'SubstituteTaggedSubexpressions(csl, s);
+    //     {s, c} := CSE(s);
+    //     csl := Concat(csl, c);
+    //     DestructiveReplace(derivE, i, {derivE[i][1], s});
+    // ];
     
-    i := 1;
-    While (i <= Length(derivE)) [
-        t := derivE[i];
-        c := t[1];
-        v := t[2];
-        If (IsAtom(v), [
-            g := Subst(c, v) g;
-            csl := Subst(c, v) csl;
-            DestructiveDelete(derivE, i);
-        ], [
-            DestructiveReplace(derivE, i, {c, Listify(v)});
-            i := i + 1;
-        ]);
-    ];
-    csl := Concat( csl, derivE);
+    {derivE, ints, csl} := EvalSubexpression( derivE, "DerivE", "HoldERI", ints, csl  );
+    // Echo(derivE);
+
+    // i := 1;
+    // While (i <= Length(derivE)) [
+    //     t := derivE[i];
+    //     c := t[1];
+    //     v := t[2];
+    //     If (IsAtom(v), [
+    //         g := Subst(c, v) g;
+    //         csl := Subst(c, v) csl;
+    //         DestructiveDelete(derivE, i);
+    //     ], [
+    //         DestructiveReplace(derivE, i, {c, Listify(v)});
+    //         i := i + 1;
+    //     ]);
+    // ];
+    // csl := Concat( csl, derivE);
     
+    csl := MoveAtoms2Csl(derivE, csl);
     //###################d2r2#############################
 
-    For (i := 1, i <= Length(d2r2), i++) [
-        s := Eval("d2R2e" @ Tail(d2r2[i][2]));
+    // For (i := 1, i <= Length(d2r2), i++) [
+    //     s := Eval("d2R2e" @ Tail(d2r2[i][2]));
 
-        s := CSE'SubstituteTaggedSubexpressions(csl, s);
-        {s, c} := CSE(s);
-        csl := Concat(csl, c);
-        DestructiveReplace(d2r2, i, {d2r2[i][1], s});
-    ];
-    i := 1;
-    While (i <= Length(d2r2)) [
-        t := d2r2[i];
-        c := t[1];
-        v := t[2];
-        If (IsAtom(v), [
-            g := Subst(c, v) g;
-            csl := Subst(c, v) csl;
-            DestructiveDelete(d2r2, i);
-        ], [
-            DestructiveReplace(d2r2, i, {c, Listify(v)});
-            i := i + 1;
-        ]);
-    ];
-    csl := Concat( csl, d2r2);
+    //     s := CSE'SubstituteTaggedSubexpressions(csl, s);
+    //     {s, c} := CSE(s);
+    //     csl := Concat(csl, c);
+    //     DestructiveReplace(d2r2, i, {d2r2[i][1], s});
+    // ];
 
+    { d2r2, csl} := EvalSubexpression( d2r2, "d2R2e", csl  );
+
+
+    // i := 1;
+    // While (i <= Length(d2r2)) [
+    //     t := d2r2[i];
+    //     c := t[1];
+    //     v := t[2];
+    //     If (IsAtom(v), [
+    //         g := Subst(c, v) g;
+    //         csl := Subst(c, v) csl;
+    //         DestructiveDelete(d2r2, i);
+    //     ], [
+    //         DestructiveReplace(d2r2, i, {c, Listify(v)});
+    //         i := i + 1;
+    //     ]);
+    // ];
+    // csl := Concat( csl, d2r2);
+    csl := MoveAtoms2Csl(d2r2, csl);
     //#######################dr2##############################
 
-    For (i := 1, i <= Length(dr2), i++) [
-        s := Eval("dR2el" @ Tail(dr2[i][2]));
+    // For (i := 1, i <= Length(dr2), i++) [
+    //     s := Eval("dR2el" @ Tail(dr2[i][2]));
 
-        s := CSE'SubstituteTaggedSubexpressions(csl, s);
-        {s, c} := CSE(s);
-        csl := Concat(csl, c);
-        DestructiveReplace(dr2, i, {dr2[i][1], s});
-    ];
+    //     s := CSE'SubstituteTaggedSubexpressions(csl, s);
+    //     {s, c} := CSE(s);
+    //     csl := Concat(csl, c);
+    //     DestructiveReplace(dr2, i, {dr2[i][1], s});
+    // ];
 
-    i := 1;
-    While (i <= Length(dr2)) [
-        t := dr2[i];
-        c := t[1];
-        v := t[2];
-        If (IsAtom(v), [
-            g := Subst(c, v) g;
-            csl := Subst(c, v) csl;
-            DestructiveDelete(dr2, i);
-        ], [
-            DestructiveReplace(dr2, i, {c, Listify(v)});
-            i := i + 1;
-        ]);
-    ];
-    csl := Concat( csl, dr2);
+    { dr2, csl} := EvalSubexpression( dr2, "dR2el", csl  );
+
+    // i := 1;
+    // While (i <= Length(dr2)) [
+    //     t := dr2[i];
+    //     c := t[1];
+    //     v := t[2];
+    //     If (IsAtom(v), [
+    //         g := Subst(c, v) g;
+    //         csl := Subst(c, v) csl;
+    //         DestructiveDelete(dr2, i);
+    //     ], [
+    //         DestructiveReplace(dr2, i, {c, Listify(v)});
+    //         i := i + 1;
+    //     ]);
+    // ];
+    // csl := Concat( csl, dr2);
+    csl := MoveAtoms2Csl(dr2, csl);
 
     //########################r2##############################
  
-    For (i := 1, i <= Length(r2), i++) [
-        s := Eval("R" @ Tail(r2[i][2]));
+    // For (i := 1, i <= Length(r2), i++) [
+    //     s := Eval("R" @ Tail(r2[i][2]));
 
-        s := CSE'SubstituteTaggedSubexpressions(csl, s);
-        {s, c} := CSE(s);
-        csl := Concat(csl, c);
-        DestructiveReplace(r2, i, {r2[i][1], s});
-    ];
+    //     s := CSE'SubstituteTaggedSubexpressions(csl, s);
+    //     {s, c} := CSE(s);
+    //     csl := Concat(csl, c);
+    //     DestructiveReplace(r2, i, {r2[i][1], s});
+    // ];
+    { r2, csl} := EvalSubexpression( r2, "R", csl  );
 
-    i := 1;
-    While (i <= Length(r2)) [
-        t := r2[i];
-        c := t[1];
-        v := t[2];
-        If (IsAtom(v), [
-            g := Subst(c, v) g;
-            csl := Subst(c, v) csl;
-            DestructiveDelete(r2, i);
-        ], [
-            DestructiveReplace(r2, i, {c, Listify(v)});
-            i := i + 1;
-        ]);
-    ];
-    csl := Concat( csl, r2);
+    // i := 1;
+    // While (i <= Length(r2)) [
+    //     t := r2[i];
+    //     c := t[1];
+    //     v := t[2];
+    //     If (IsAtom(v), [
+    //         g := Subst(c, v) g;
+    //         csl := Subst(c, v) csl;
+    //         DestructiveDelete(r2, i);
+    //     ], [
+    //         DestructiveReplace(r2, i, {c, Listify(v)});
+    //         i := i + 1;
+    //     ]);
+    // ];
+    // csl := Concat( csl, r2);
+    csl := MoveAtoms2Csl(r2, csl);
  
     //#######################Cart2Herm#######################
     herms := {};
 
-    For (i := 1, i <= Length(ints), i++) [
-        s := Eval("Cart2HermExpCoeff" @ Tail(ints[i][2]));
+    // For (i := 1, i <= Length(ints), i++) [
+    //     s := Eval("Cart2HermExpCoeff" @ Tail(ints[i][2]));
         
-        s := CSE'SubstituteTaggedSubexpressions(herms, s);
-        {new'herms, s} := CSE'Extract( s, "holdHermitianGaussian" );
-        herms := Concat( herms, new'herms );
+    //     s := CSE'SubstituteTaggedSubexpressions(herms, s);
+    //     {new'herms, s} := CSE'Extract( s, "holdHermitianGaussian" );
+    //     herms := Concat( herms, new'herms );
         
-        s := CSE'SubstituteTaggedSubexpressions(csl, s);
-        {s, c} := CSE(s);
-        csl := Concat(csl, c);
-        DestructiveReplace(ints, i, {ints[i][1], s});
-    ];
+    //     s := CSE'SubstituteTaggedSubexpressions(csl, s);
+    //     {s, c} := CSE(s);
+    //     csl := Concat(csl, c);
+    //     DestructiveReplace(ints, i, {ints[i][1], s});
+    // ];
 
+    {ints, herms, csl} := EvalSubexpression( ints, "Cart2HermExpCoeff", 
+        "holdHermitianGaussian", herms, csl  );
 
     ints := CSE'SubstituteTaggedSubexpressions(csl, ints);
     {ints, c} := CSE(ints);
     csl := Concat(csl, c);
     
-    i := 1;
-    While (i <= Length(ints)) [
-        t := ints[i];
-        c := t[1];
-        v := t[2];
-        If (IsAtom(v), [
-            g := Subst(c, v) g;
-            csl := Subst(c, v) csl;
-            DestructiveDelete(ints, i);
-        ], [
-            DestructiveReplace(ints, i, {c, Listify(v)});
-            i := i + 1;
-        ]);
-    ];
+    // i := 1;
+    // While (i <= Length(ints)) [
+    //     t := ints[i];
+    //     c := t[1];
+    //     v := t[2];
+    //     If (IsAtom(v), [
+    //         g := Subst(c, v) g;
+    //         csl := Subst(c, v) csl;
+    //         DestructiveDelete(ints, i);
+    //     ], [
+    //         DestructiveReplace(ints, i, {c, Listify(v)});
+    //         i := i + 1;
+    //     ]);
+    // ];
 
-    csl := Concat(csl, ints);
+    // csl := Concat(csl, ints);
     
+    csl := MoveAtoms2Csl(ints, csl);
+
     //#######################herms#######################
 
-    For (i := 1, i <= Length(herms), i++) [
-        s := Eval("HermitianGaussian" @ Tail(herms[i][2]));
+    // For (i := 1, i <= Length(herms), i++) [
+    //     s := Eval("HermitianGaussian" @ Tail(herms[i][2]));
         
-        s := CSE'SubstituteTaggedSubexpressions(csl, s);
-        {s, c} := CSE(s);
-        csl := Concat(csl, c);
-        DestructiveReplace(herms, i, {herms[i][1], s});
-    ];
+    //     s := CSE'SubstituteTaggedSubexpressions(csl, s);
+    //     {s, c} := CSE(s);
+    //     csl := Concat(csl, c);
+    //     DestructiveReplace(herms, i, {herms[i][1], s});
+    // ];
+
+    { herms, csl} := EvalSubexpression( herms, "HermitianGaussian", csl  );
 
     herms := CSE'SubstituteTaggedSubexpressions(csl, herms);
     {herms, c} := CSE(herms);
     csl := Concat(csl, c);
     
-    i := 1;
-    While (i <= Length(herms)) [
-        t := herms[i];
-        c := t[1];
-        v := t[2];
-        If (IsAtom(v), [
-            g := Subst(c, v) g;
-            csl := Subst(c, v) csl;
-            DestructiveDelete(herms, i);
-        ], [
-            DestructiveReplace(herms, i, {c, Listify(v)});
-            i := i + 1;
-        ]);
-    ];
+    // i := 1;
+    // While (i <= Length(herms)) [
+    //     t := herms[i];
+    //     c := t[1];
+    //     v := t[2];
+    //     If (IsAtom(v), [
+    //         g := Subst(c, v) g;
+    //         csl := Subst(c, v) csl;
+    //         DestructiveDelete(herms, i);
+    //     ], [
+    //         DestructiveReplace(herms, i, {c, Listify(v)});
+    //         i := i + 1;
+    //     ]);
+    // ];
   
     
-    csl := Concat(csl, herms);
+    // csl := Concat(csl, herms);
+
+    csl := MoveAtoms2Csl(herms, csl);
     //#################Koniec###############################3
 
     //g := CSE'SubstituteTaggedSubexpressions(csl, g);
@@ -483,3 +504,11 @@ EmitD2ERI(_l1, _l2, _l3, _l4, _o) <-- [
 
     Echo("}");
 ];
+
+// ToFile("test.cpp") [
+//     Echo("#include<cmath>");
+//     Echo("double Pi = 3.0;");
+//     EmitD2ERI( 0, 0, 0, 0, {1, 1});
+
+//     Echo("int main() {} ;");
+// ];

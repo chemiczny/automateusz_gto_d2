@@ -1,0 +1,46 @@
+EvalSubexpression( _exprList, _name2eval, _name2extract, _subexprList, _csl  ) <-- [
+    Local(s, new'ints, s);
+    For (i := 1, i <= Length(exprList), i++) [
+        s := Eval(name2eval @ Tail(exprList[i][2]));
+        s := CSE'SubstituteTaggedSubexpressions(subexprList, s);
+        {new'ints, s} := CSE'Extract( s, name2extract );
+        subexprList := Concat( subexprList, new'ints );
+        s := CSE'SubstituteTaggedSubexpressions(csl, s);
+        {s, c} := CSE(s);
+        csl := Concat(csl, c);
+        DestructiveReplace(exprList, i, {exprList[i][1], s});
+    ];
+    {exprList, subexprList, csl};
+];
+
+EvalSubexpression( _exprList, _name2eval,  _csl  ) <-- [
+    Local(s, new'ints, s);
+    For (i := 1, i <= Length(exprList), i++) [
+        s := Eval(name2eval @ Tail(exprList[i][2]));
+
+        s := CSE'SubstituteTaggedSubexpressions(csl, s);
+        {s, c} := CSE(s);
+        csl := Concat(csl, c);
+        DestructiveReplace(exprList, i, {exprList[i][1], s});
+    ];
+    { exprList, csl};
+];
+
+MoveAtoms2Csl(_exprList, _csl) <-- [
+    i := 1;
+    While (i <= Length(exprList)) [
+        t := exprList[i];
+        c := t[1];
+        v := t[2];
+        If (IsAtom(v), [
+            g := Subst(c, v) g;
+            csl := Subst(c, v) csl;
+            DestructiveDelete(exprList, i);
+        ], [
+            DestructiveReplace(exprList, i, {c, Listify(v)});
+            i := i + 1;
+        ]);
+    ];
+    csl := Concat( csl, exprList);
+    csl;
+];
