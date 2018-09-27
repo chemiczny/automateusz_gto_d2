@@ -207,7 +207,7 @@ EmitD2ERI(_l1, _l2, _l3, _l4, _o) <-- [
         i := i + 1;
     ];
     
-    csl := d2ERI'Csl( csl, derivE, d2r2, dr2, r2, ints );
+    {csl, g} := d2ERI'Csl( csl, derivE, d2r2, dr2, r2, ints, g );
 
     //g := CSE'SubstituteTaggedSubexpressions(csl, g);
     //{g, c} := CSE(g);
@@ -308,7 +308,7 @@ EmitD2ERI(_l1, _l2, _l3, _l4, _o) <-- [
 // ToFile("test.cpp") [
 //     Echo("#include<cmath>");
 //     Echo("double Pi = 3.0;");
-//     EmitD2ERI( 0, 0, 0, 0, {1, 1});
+//     EmitD2ERI( 1, 0, 0, 0, {1, 1});
 
 //     Echo("int main() {} ;");
 // ];

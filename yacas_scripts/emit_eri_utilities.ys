@@ -26,7 +26,7 @@ EvalSubexpression( _exprList, _name2eval,  _csl  ) <-- [
     { exprList, csl};
 ];
 
-MoveAtoms2Csl(_exprList, _csl) <-- [
+MoveAtoms2Csl(_exprList, _csl, _g) <-- [
     i := 1;
     While (i <= Length(exprList)) [
         t := exprList[i];
@@ -42,30 +42,33 @@ MoveAtoms2Csl(_exprList, _csl) <-- [
         ]);
     ];
     csl := Concat( csl, exprList);
-    csl;
+    {csl, g};
 ];
 
-d2ERI'Csl( _csl, _derivE, _d2r2, _dr2, _r2, _ints ) <-- [
+d2ERI'Csl( _csl, _derivE, _d2r2, _dr2, _r2, _ints, _g ) <-- [
+
+
     {derivE, ints, csl} := EvalSubexpression( derivE, "DerivE", "HoldERI", ints, csl  );
     
-    csl := MoveAtoms2Csl(derivE, csl);
+    {csl, g } := MoveAtoms2Csl(derivE, csl, g);
 
     //###################d2r2#############################
 
     { d2r2, csl} := EvalSubexpression( d2r2, "d2R2e", csl  );
-    csl := MoveAtoms2Csl(d2r2, csl);
+    { csl, g } := MoveAtoms2Csl(d2r2, csl, g);
 
     //#######################dr2##############################
 
     { dr2, csl} := EvalSubexpression( dr2, "dR2el", csl  );
-    csl := MoveAtoms2Csl(dr2, csl);
+    { csl, g } := MoveAtoms2Csl(dr2, csl, g);
 
     //########################r2##############################
- 
+
     { r2, csl} := EvalSubexpression( r2, "R", csl  );
-    csl := MoveAtoms2Csl(r2, csl);
+    { csl, g } := MoveAtoms2Csl(r2, csl, g);
  
     //#######################Cart2Herm#######################
+
     herms := {};
 
     {ints, herms, csl} := EvalSubexpression( ints, "Cart2HermExpCoeff", 
@@ -76,7 +79,7 @@ d2ERI'Csl( _csl, _derivE, _d2r2, _dr2, _r2, _ints ) <-- [
     csl := Concat(csl, c);
     
     
-    csl := MoveAtoms2Csl(ints, csl);
+    {csl, g} := MoveAtoms2Csl(ints, csl, g);
 
     //#######################herms#######################
 
@@ -86,9 +89,9 @@ d2ERI'Csl( _csl, _derivE, _d2r2, _dr2, _r2, _ints ) <-- [
     {herms, c} := CSE(herms);
     csl := Concat(csl, c);
 
-    csl := MoveAtoms2Csl(herms, csl);
+    {csl, g} := MoveAtoms2Csl(herms, csl, g);
     //#################Koniec###############################
-    csl;
+    { csl, g};
 ];
 
 writeAsFunction( csl ) <-- [
