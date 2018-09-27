@@ -44,3 +44,108 @@ MoveAtoms2Csl(_exprList, _csl) <-- [
     csl := Concat( csl, exprList);
     csl;
 ];
+
+d2ERI'Csl( _csl, _derivE, _d2r2, _dr2, _r2, _ints ) <-- [
+    {derivE, ints, csl} := EvalSubexpression( derivE, "DerivE", "HoldERI", ints, csl  );
+    
+    csl := MoveAtoms2Csl(derivE, csl);
+
+    //###################d2r2#############################
+
+    { d2r2, csl} := EvalSubexpression( d2r2, "d2R2e", csl  );
+    csl := MoveAtoms2Csl(d2r2, csl);
+
+    //#######################dr2##############################
+
+    { dr2, csl} := EvalSubexpression( dr2, "dR2el", csl  );
+    csl := MoveAtoms2Csl(dr2, csl);
+
+    //########################r2##############################
+ 
+    { r2, csl} := EvalSubexpression( r2, "R", csl  );
+    csl := MoveAtoms2Csl(r2, csl);
+ 
+    //#######################Cart2Herm#######################
+    herms := {};
+
+    {ints, herms, csl} := EvalSubexpression( ints, "Cart2HermExpCoeff", 
+        "holdHermitianGaussian", herms, csl  );
+
+    ints := CSE'SubstituteTaggedSubexpressions(csl, ints);
+    {ints, c} := CSE(ints);
+    csl := Concat(csl, c);
+    
+    
+    csl := MoveAtoms2Csl(ints, csl);
+
+    //#######################herms#######################
+
+    { herms, csl} := EvalSubexpression( herms, "HermitianGaussian", csl  );
+
+    herms := CSE'SubstituteTaggedSubexpressions(csl, herms);
+    {herms, c} := CSE(herms);
+    csl := Concat(csl, c);
+
+    csl := MoveAtoms2Csl(herms, csl);
+    //#################Koniec###############################
+    csl;
+];
+
+writeAsFunction( csl ) <-- [
+        Echo("void eri_gradient_"  : "_"  : "_base(");
+    Echo("    const double ae,");
+    Echo("    const double xA,");
+    Echo("    const double yA,");
+    Echo("    const double zA,");
+    Echo("    const double be,");
+    Echo("    const double xB,");
+    Echo("    const double yB,");
+    Echo("    const double zB,");
+    Echo("    const double ce,");
+    Echo("    const double xC,");
+    Echo("    const double yC,");
+    Echo("    const double zC,");
+    Echo("    const double de,");
+    Echo("    const double xD,");
+    Echo("    const double yD,");
+    Echo("    const double zD,");
+    Echo("    const double* const bs,");
+    Echo("    double* const g)");
+    Echo("{");
+    Echo("    const double xAB = xA - xB;");
+    Echo("    const double yAB = yA - yB;");
+    Echo("    const double zAB = zA - zB;");
+
+    Echo("    const double xCD = xC - xD;");
+    Echo("    const double yCD = yC - yD;");
+    Echo("    const double zCD = zC - zD;");
+
+    Echo("    const double p = ae + be;");
+    Echo("    const double q = ce + de;");
+
+    Echo("    const double xP = (ae * xA + be * xB) / p;");
+    Echo("    const double yP = (ae * yA + be * yB) / p;");
+    Echo("    const double zP = (ae * zA + be * zB) / p;");
+
+    Echo("    const double xQ = (ce * xC + de * xD) / q;");
+    Echo("    const double yQ = (ce * yC + de * yD) / q;");
+    Echo("    const double zQ = (ce * zC + de * zD) / q;");
+
+    Echo("    const double muab = ae * be / p;");
+    Echo("    const double mucd = ce * de / q;");
+
+    Echo("    const double rAB2 = xAB * xAB + yAB * yAB + zAB * zAB;");
+    Echo("    const double rCD2 = xCD * xCD + yCD * yCD + zCD * zCD;");
+    
+    Echo("    const double kab = std::exp(-muab * rAB2);");
+    Echo("    const double kcd = std::exp(-mucd * rCD2);");
+
+
+    ForEach(d, CSE'EmitDefinitions(CSE'GenerateAssignments(csl)))
+            WriteString("    " : d : Nl());
+
+    For (i := 1, i <= Length(csl), i++)
+        Echo("    g[" : CppForm(i - 1) : "] = " : String(csl[i][1]) : ";");
+
+    Echo("}");
+];
