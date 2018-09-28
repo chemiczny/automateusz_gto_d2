@@ -68,28 +68,14 @@ d2ERI'Csl( _csl, _derivE, _d2r2, _dr2, _r2, _ints, _g ) <-- [
     { csl, g } := MoveAtoms2Csl(r2, csl, g);
  
     //#######################Cart2Herm#######################
+    {ints, csl} := EvalSubexpression( ints, "Cart2HermExpCoeff", csl  );
 
-    herms := {};
-
-    {ints, herms, csl} := EvalSubexpression( ints, "Cart2HermExpCoeff", 
-        "holdHermitianGaussian", herms, csl  );
-
-    ints := CSE'SubstituteTaggedSubexpressions(csl, ints);
-    {ints, c} := CSE(ints);
-    csl := Concat(csl, c);
+    // ints := CSE'SubstituteTaggedSubexpressions(csl, ints);
+    // {ints, c} := CSE(ints);
+    // csl := Concat(csl, c);
     
     
     {csl, g} := MoveAtoms2Csl(ints, csl, g);
-
-    //#######################herms#######################
-
-    { herms, csl} := EvalSubexpression( herms, "HermitianGaussian", csl  );
-
-    herms := CSE'SubstituteTaggedSubexpressions(csl, herms);
-    {herms, c} := CSE(herms);
-    csl := Concat(csl, c);
-
-    {csl, g} := MoveAtoms2Csl(herms, csl, g);
     //#################Koniec###############################
     { csl, g};
 ];

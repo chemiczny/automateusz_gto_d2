@@ -176,7 +176,6 @@ Function("CSE'FindFuncMultiCalls", {e, multif})
 		   ];
        ]
    );
-   //Echo("//Przed wyjebaniem: ", r);
    r;
 ];
 
@@ -185,20 +184,16 @@ Function("CSE'ExtractMulti", {expr, f})
     Local(e, i, l, csl, uc, lSize, k);
 
     e := expr;
-	//Echo("//Multi gunwo wejscie");
     l := CSE'FindFuncMultiCalls(e, f);
 	lSize := Length( l );
-	//Echo("//Po multi gowienku");
 	csl := {};
 	For( i:=1, i <= lSize, i := i+1 ) [
 		l[i] := Listify /@ l[i] ;
     	l[i] := RemoveDuplicates(l[i]);
 		csl := Append( csl, {} );
 	];
-    //Echo("//multi gunwo: l: ", l);
 	For( k:=1, k <= lSize, k := k+1 ) [
 		ForEach(i, l[k]) [
-			//Echo("multi gunwo: i", i);
 			uc := UniqueConstant();
 			DestructiveAppend(csl[k], {uc, i});
 			e := Subst(UnList(i), uc) e;
