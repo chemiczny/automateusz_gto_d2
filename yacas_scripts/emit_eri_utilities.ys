@@ -3,8 +3,8 @@ EvalSubexpression( _exprList, _name2eval, _name2extract, _subexprList, _csl  ) <
     For (i := 1, i <= Length(exprList), i++) [
         s := Eval(name2eval @ Tail(exprList[i][2]));
         s := CSE'SubstituteTaggedSubexpressions(subexprList, s);
-        {new'ints, s} := CSE'Extract( s, name2extract );
-        subexprList := Concat( subexprList, new'ints );
+        // {new'ints, s} := CSE'Extract( s, name2extract );
+        // subexprList := Concat( subexprList, new'ints );
         s := CSE'SubstituteTaggedSubexpressions(csl, s);
         {s, c} := CSE(s);
         csl := Concat(csl, c);
@@ -45,6 +45,7 @@ MoveAtoms2Csl(_exprList, _csl, _g) <-- [
     {csl, g};
 ];
 
+
 d2ERI'Csl( _csl, _derivE, _d2r2, _dr2, _r2, _ints, _g ) <-- [
 
 
@@ -80,61 +81,61 @@ d2ERI'Csl( _csl, _derivE, _d2r2, _dr2, _r2, _ints, _g ) <-- [
     { csl, g};
 ];
 
-writeAsFunction( csl ) <-- [
-        Echo("void eri_gradient_"  : "_"  : "_base(");
-    Echo("    const double ae,");
-    Echo("    const double xA,");
-    Echo("    const double yA,");
-    Echo("    const double zA,");
-    Echo("    const double be,");
-    Echo("    const double xB,");
-    Echo("    const double yB,");
-    Echo("    const double zB,");
-    Echo("    const double ce,");
-    Echo("    const double xC,");
-    Echo("    const double yC,");
-    Echo("    const double zC,");
-    Echo("    const double de,");
-    Echo("    const double xD,");
-    Echo("    const double yD,");
-    Echo("    const double zD,");
-    Echo("    const double* const bs,");
-    Echo("    double* const g)");
-    Echo("{");
-    Echo("    const double xAB = xA - xB;");
-    Echo("    const double yAB = yA - yB;");
-    Echo("    const double zAB = zA - zB;");
+// writeAsFunction( csl ) <-- [
+//         Echo("void eri_gradient_"  : "_"  : "_base(");
+//     Echo("    const double ae,");
+//     Echo("    const double xA,");
+//     Echo("    const double yA,");
+//     Echo("    const double zA,");
+//     Echo("    const double be,");
+//     Echo("    const double xB,");
+//     Echo("    const double yB,");
+//     Echo("    const double zB,");
+//     Echo("    const double ce,");
+//     Echo("    const double xC,");
+//     Echo("    const double yC,");
+//     Echo("    const double zC,");
+//     Echo("    const double de,");
+//     Echo("    const double xD,");
+//     Echo("    const double yD,");
+//     Echo("    const double zD,");
+//     Echo("    const double* const bs,");
+//     Echo("    double* const g)");
+//     Echo("{");
+//     Echo("    const double xAB = xA - xB;");
+//     Echo("    const double yAB = yA - yB;");
+//     Echo("    const double zAB = zA - zB;");
 
-    Echo("    const double xCD = xC - xD;");
-    Echo("    const double yCD = yC - yD;");
-    Echo("    const double zCD = zC - zD;");
+//     Echo("    const double xCD = xC - xD;");
+//     Echo("    const double yCD = yC - yD;");
+//     Echo("    const double zCD = zC - zD;");
 
-    Echo("    const double p = ae + be;");
-    Echo("    const double q = ce + de;");
+//     Echo("    const double p = ae + be;");
+//     Echo("    const double q = ce + de;");
 
-    Echo("    const double xP = (ae * xA + be * xB) / p;");
-    Echo("    const double yP = (ae * yA + be * yB) / p;");
-    Echo("    const double zP = (ae * zA + be * zB) / p;");
+//     Echo("    const double xP = (ae * xA + be * xB) / p;");
+//     Echo("    const double yP = (ae * yA + be * yB) / p;");
+//     Echo("    const double zP = (ae * zA + be * zB) / p;");
 
-    Echo("    const double xQ = (ce * xC + de * xD) / q;");
-    Echo("    const double yQ = (ce * yC + de * yD) / q;");
-    Echo("    const double zQ = (ce * zC + de * zD) / q;");
+//     Echo("    const double xQ = (ce * xC + de * xD) / q;");
+//     Echo("    const double yQ = (ce * yC + de * yD) / q;");
+//     Echo("    const double zQ = (ce * zC + de * zD) / q;");
 
-    Echo("    const double muab = ae * be / p;");
-    Echo("    const double mucd = ce * de / q;");
+//     Echo("    const double muab = ae * be / p;");
+//     Echo("    const double mucd = ce * de / q;");
 
-    Echo("    const double rAB2 = xAB * xAB + yAB * yAB + zAB * zAB;");
-    Echo("    const double rCD2 = xCD * xCD + yCD * yCD + zCD * zCD;");
+//     Echo("    const double rAB2 = xAB * xAB + yAB * yAB + zAB * zAB;");
+//     Echo("    const double rCD2 = xCD * xCD + yCD * yCD + zCD * zCD;");
     
-    Echo("    const double kab = std::exp(-muab * rAB2);");
-    Echo("    const double kcd = std::exp(-mucd * rCD2);");
+//     Echo("    const double kab = std::exp(-muab * rAB2);");
+//     Echo("    const double kcd = std::exp(-mucd * rCD2);");
 
 
-    ForEach(d, CSE'EmitDefinitions(CSE'GenerateAssignments(csl)))
-            WriteString("    " : d : Nl());
+//     ForEach(d, CSE'EmitDefinitions(CSE'GenerateAssignments(csl)))
+//             WriteString("    " : d : Nl());
 
-    For (i := 1, i <= Length(csl), i++)
-        Echo("    g[" : CppForm(i - 1) : "] = " : String(csl[i][1]) : ";");
+//     For (i := 1, i <= Length(csl), i++)
+//         Echo("    g[" : CppForm(i - 1) : "] = " : String(csl[i][1]) : ";");
 
-    Echo("}");
-];
+//     Echo("}");
+// ];

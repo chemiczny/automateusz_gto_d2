@@ -1,3 +1,5 @@
+// Use("emit_eri_d2.ys");
 Use("emit_eri_d2_divided.ys");
-
-EmitD2ERI( 0, 0, 0, 0, 1);
+EmitD2ERI( 0, 0, 0, 0, {1, 1});
+Echo("Zaczynam");
+Echo("Test");

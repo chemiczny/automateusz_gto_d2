@@ -1,0 +1,192 @@
+EchoSubfunction( _subname, _l1, _l2, _l3, _l4, _o, _expressions, _expr2eval, _g, _subArray, _mainCsl ) <-- [
+	Local(csl, edges, keys);
+	origExpressions := DeepCopy(expressions);
+
+    csl := {};
+    // Echo("//wyrazenia":expressions);
+    { expressions, csl} := EvalSubexpression( expressions, expr2eval, csl  );
+    // Echo("//znowu wyrazenia ": expressions);
+    { csl, g} := MoveAtoms2Csl(expressions, csl, g);
+
+    For (i := 1, i <= Length(origExpressions), i++) [
+        // Echo("    g[" : CppForm(i - 1) : "] = " : String(origExpressions[i][1]) : ";");
+        g := Subst(origExpressions[i][1], Atom(subArray:"[" : CppForm(i - 1) : "]")) g;
+        mainCsl := Subst(origExpressions[i][1], Atom(subArray:"[" : CppForm(i - 1) : "]")) mainCsl;
+    ];
+
+	Echo(" ");
+    Echo("void second_derivative_ee_" : CppForm(l1) : CppForm(l2) : CppForm(l3) : CppForm(l4) : "_" : CppForm(o[1]): CppForm(o[2]) : "_": subname :"(");
+    Echo("    const double ae,");
+    Echo("    const double xA,");
+    Echo("    const double yA,");
+    Echo("    const double zA,");
+    Echo("    const double be,");
+    Echo("    const double xB,");
+    Echo("    const double yB,");
+    Echo("    const double zB,");
+    Echo("    const double ce,");
+    Echo("    const double xC,");
+    Echo("    const double yC,");
+    Echo("    const double zC,");
+    Echo("    const double de,");
+    Echo("    const double xD,");
+    Echo("    const double yD,");
+    Echo("    const double zD,");
+    Echo("    const double* const bs,");
+    Echo("    double* const g)");
+    Echo("{");
+
+    Echo("    const double p = ae + be;");
+    Echo("    const double q = ce + de;");
+
+    Echo("    const double xP = (ae * xA + be * xB) / p;");
+    Echo("    const double yP = (ae * yA + be * yB) / p;");
+    Echo("    const double zP = (ae * zA + be * zB) / p;");
+
+    Echo("    const double xQ = (ce * xC + de * xD) / q;");
+    Echo("    const double yQ = (ce * yC + de * yD) / q;");
+    Echo("    const double zQ = (ce * zC + de * zD) / q;");
+
+    edges := {};
+    // keys := Transpose(d2r2csl)[1];
+    keys := Association'Create();
+    t:= Transpose(csl)[1];
+    ForEach(i, 1 .. Length(t))
+        Association'Set(keys, t[i], i);
+
+    ForEach (i, 1 .. Length(csl)) [
+        vars := VarList(Eval(UnList(csl[i][2])));
+
+        ForEach (var, vars) [
+            j := Association'Get(keys, var);
+            //j := Find(keys, var);
+            If (j > 0, DestructiveAppend(edges, {j, i}));
+        ];
+
+    ];
+ 	// Echo("//dupa");
+ 	// Echo("//csl":csl);
+ 	// Echo("//edges":edges);
+    // Echo("//Do sortowania topologicznego wchodzi: csl", d2r2csl);
+    // Echo("//Do sortowania topologicznego wchodzi: edges ", edges);
+    If (edges != {}, csl := TopologicalSort'Kahn(csl, edges) );
+    // Echo("//dupa2");
+    ForEach(d, CSE'EmitDefinitions(CSE'GenerateAssignments(csl)))
+            WriteString("    " : d : Nl());
+    // Echo("//dupa3");
+    For (i := 1, i <= Length(origExpressions), i++) [
+        Echo("    g[" : CppForm(i - 1) : "] = " : String(origExpressions[i][1]) : ";");
+        // g := Subst(origExpressions[i][1], Atom(subArray:"[" : CppForm(i - 1) : "]")) g;
+    ];
+
+
+    Echo("};");
+    {g , mainCsl };
+];
+
+expr2arrayType( _expr, _arrayName) <-- [
+	For (i := 1, i <= Length(expr), i++)
+		expr[i][1] := Atom(arrayName : "[" : CppForm(i - 1) : "]") ;
+];
+
+EchoSubfunction( _subname, _l1, _l2, _l3, _l4, _o, _expressions, _expr2eval, _subexpr2hold, _origSubexpressions, _g, _subArray, _mainCsl ) <-- [
+	Local(csl, edges, keys);
+	origExpressions := DeepCopy(expressions);
+	subexpressions := DeepCopy(origSubexpressions);
+
+	For (i := 1, i <= Length(subexpressions), i++) [
+		subexpressions[i][1] := Atom("s[" : CppForm(i - 1) : "]") ;
+	];
+
+    csl := {};
+    // Echo("//kurla");
+    // // Echo("//": subexpr2hold);
+    // Echo("// przed": subexpressions);
+    { expressions, subexpressions ,csl} := EvalSubexpression( expressions, expr2eval, subexpr2hold , subexpressions ,  csl  );
+    // // Echo("//kurla mac");
+    // Echo("// po": subexpressions);
+
+    { csl, g} := MoveAtoms2Csl(expressions, csl, g);
+
+    For (i := 1, i <= Length(origExpressions), i++) [
+    	// Echo("//g teraz : ":g);
+        // Echo("    g[" : CppForm(i - 1) : "] = " : String(origExpressions[i][1]) : ";");
+        g := Subst(origExpressions[i][1], Atom(subArray:"[" : CppForm(i - 1) : "]")) g;
+        mainCsl := Subst(origExpressions[i][1], Atom(subArray:"[" : CppForm(i - 1) : "]")) mainCsl;
+        // Echo("Zamieniam ":String(origExpressions[i][1]) : " na ":
+        // 	String(Atom(subArray:"[" : CppForm(i - 1) : "]")));
+        // Echo("//i teraz ":g);
+    ];
+
+	Echo(" ");
+    Echo("void second_derivative_ee_" : CppForm(l1) : CppForm(l2) : CppForm(l3) : CppForm(l4) : "_" : CppForm(o[1]): CppForm(o[2]) : "_": subname :"(");
+    Echo("    const double ae,");
+    Echo("    const double xA,");
+    Echo("    const double yA,");
+    Echo("    const double zA,");
+    Echo("    const double be,");
+    Echo("    const double xB,");
+    Echo("    const double yB,");
+    Echo("    const double zB,");
+    Echo("    const double ce,");
+    Echo("    const double xC,");
+    Echo("    const double yC,");
+    Echo("    const double zC,");
+    Echo("    const double de,");
+    Echo("    const double xD,");
+    Echo("    const double yD,");
+    Echo("    const double zD,");
+    Echo("    const double* const bs,");
+    Echo("    const double* s,");
+    Echo("    double* const g)");
+    Echo("{");
+
+    Echo("    const double p = ae + be;");
+    Echo("    const double q = ce + de;");
+
+    Echo("    const double xP = (ae * xA + be * xB) / p;");
+    Echo("    const double yP = (ae * yA + be * yB) / p;");
+    Echo("    const double zP = (ae * zA + be * zB) / p;");
+
+    Echo("    const double xQ = (ce * xC + de * xD) / q;");
+    Echo("    const double yQ = (ce * yC + de * yD) / q;");
+    Echo("    const double zQ = (ce * zC + de * zD) / q;");
+
+    edges := {};
+    // keys := Transpose(d2r2csl)[1];
+    keys := Association'Create();
+    t:= Transpose(csl)[1];
+    ForEach(i, 1 .. Length(t))
+        Association'Set(keys, t[i], i);
+
+    ForEach (i, 1 .. Length(csl)) [
+        vars := VarList(Eval(UnList(csl[i][2])));
+
+        ForEach (var, vars) [
+            j := Association'Get(keys, var);
+            //j := Find(keys, var);
+            If (j > 0, DestructiveAppend(edges, {j, i}));
+        ];
+
+    ];
+ 	// Echo("//":csl);
+ 	// Echo("//":edges);
+    // Echo("//Do sortowania topologicznego wchodzi: csl", d2r2csl);
+    // Echo("//Do sortowania topologicznego wchodzi: edges ", edges);
+    If (edges != {}, csl := TopologicalSort'Kahn(csl, edges) );
+
+    ForEach(d, CSE'EmitDefinitions(CSE'GenerateAssignments(csl)))
+            WriteString("    " : d : Nl());
+
+    For (i := 1, i <= Length(origExpressions), i++) [
+    	// Echo("//g teraz : ":g);
+        Echo("    g[" : CppForm(i - 1) : "] = " : String(origExpressions[i][1]) : ";");
+        // g := Subst(origExpressions[i][1], Atom(subArray:"[" : CppForm(i - 1) : "]")) g;
+        // Echo("Zamieniam ":String(origExpressions[i][1]) : " na ":
+        // 	String(Atom(subArray:"[" : CppForm(i - 1) : "]")));
+        // Echo("//i teraz ":g);
+    ];
+
+    Echo("};");
+    { g, mainCsl };
+];

@@ -207,14 +207,14 @@ class single_d2_ee:
             ey_file.write('#include <cmath>\n')
             ey_file.write('/*\n')
             ey_file.write('<?\n')
-            ey_file.write('Use("emit_eri_d2.ys");\n')
+            ey_file.write('Use("emit_eri_d2_divided.ys");\n')
             ey_file.write('?>\n')
             ey_file.write('*/\n')
             ey_file.write('namespace { \n')
             ey_file.write('    const double Pi = M_PI;\n')
             ey_file.write('}\n')
             ey_file.write('//<?\n')
-            ey_file.write('EmitD2ERI( '+shells2num[ shells[0] ] +' , '+shells2num[ shells[1] ] +' , '
+            ey_file.write('EmitD2ERIDivided( '+shells2num[ shells[0] ] +' , '+shells2num[ shells[1] ] +' , '
                 + shells2num[ shells[2] ] +' , '+shells2num[ shells[3] ] +' , {' + atoms2num[ atoms[0] ]+ ' , '+
                 atoms2num[ atoms[1] ] +' } ); \n')
             ey_file.write('//?>\n')
