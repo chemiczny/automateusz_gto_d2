@@ -1,13 +1,13 @@
 EchoSubfunction( _subname, _l1, _l2, _l3, _l4, _o, _expressions, _expr2eval, _g, _subArray, _mainCsl ) <-- [
 	Local(csl, edges, keys);
-	origExpressions := DeepCopy(expressions);
+	
 
     csl := {};
     // Echo("//wyrazenia":expressions);
     { expressions, csl} := EvalSubexpression( expressions, expr2eval, csl  );
     // Echo("//znowu wyrazenia ": expressions);
-    { csl, g} := MoveAtoms2Csl(expressions, csl, g);
-
+    { csl, g, expressions} := MoveAtoms2Csl2(expressions, csl, g);
+    origExpressions := DeepCopy(expressions);
     For (i := 1, i <= Length(origExpressions), i++) [
         // Echo("    g[" : CppForm(i - 1) : "] = " : String(origExpressions[i][1]) : ";");
         g := Subst(origExpressions[i][1], Atom(subArray:"[" : CppForm(i - 1) : "]")) g;
@@ -91,7 +91,6 @@ expr2arrayType( _expr, _arrayName) <-- [
 
 EchoSubfunction( _subname, _l1, _l2, _l3, _l4, _o, _expressions, _expr2eval, _subexpr2hold, _origSubexpressions, _g, _subArray, _mainCsl ) <-- [
 	Local(csl, edges, keys);
-	origExpressions := DeepCopy(expressions);
 	subexpressions := DeepCopy(origSubexpressions);
 
 	For (i := 1, i <= Length(subexpressions), i++) [
@@ -106,8 +105,10 @@ EchoSubfunction( _subname, _l1, _l2, _l3, _l4, _o, _expressions, _expr2eval, _su
     // // Echo("//kurla mac");
     // Echo("// po": subexpressions);
 
-    { csl, g} := MoveAtoms2Csl(expressions, csl, g);
+    { csl, g, expressions} := MoveAtoms2Csl2(expressions, csl, g);
 
+
+	origExpressions := DeepCopy(expressions);
     For (i := 1, i <= Length(origExpressions), i++) [
     	// Echo("//g teraz : ":g);
         // Echo("    g[" : CppForm(i - 1) : "] = " : String(origExpressions[i][1]) : ";");
