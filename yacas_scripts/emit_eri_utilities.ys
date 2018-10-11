@@ -47,21 +47,24 @@ MoveAtoms2Csl(_exprList, _csl, _g) <-- [
 
 MoveAtoms2Csl2(_exprList, _csl, _g) <-- [
     i := 1;
+    newExpr := {};
     While (i <= Length(exprList)) [
         t := exprList[i];
         c := t[1];
         v := t[2];
         If (IsAtom(v), [
+            // Echo("//atom: ":c : " " : v);
             g := Subst(c, v) g;
             csl := Subst(c, v) csl;
             DestructiveDelete(exprList, i);
+            If( Not IsNumber(v) , DestructiveAppend(newExpr, v)  );
         ], [
             DestructiveReplace(exprList, i, {c, Listify(v)});
             i := i + 1;
         ]);
     ];
     csl := Concat( csl, exprList);
-    {csl, g, exprList};
+    {csl, g, exprList, newExpr};
 ];
 
 

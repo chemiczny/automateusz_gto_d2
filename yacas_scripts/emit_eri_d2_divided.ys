@@ -188,9 +188,11 @@ EmitD2ERIDivided(_l1, _l2, _l3, _l4, _o) <-- [
     { g, csl } := EchoSubfunction("r2", l1, l2, l3, l4, o, r2, "R", g, "r2", csl);
 
     //#######################Cart2Herm#######################
-
+    Echo("//csl przed c2h: ":csl);
+    Echo("//csl przed g: ":g);
     { g, csl } := EchoSubfunction("cart2herm", l1, l2, l3, l4, o, ints, "Cart2HermExpCoeff", g, "c2h", csl);
-
+    Echo("//csl po c2h: ":csl);
+    Echo("//csl po g: ":g);
     // Echo("//g na koniec : ":g);
     //#################Koniec###############################
 
@@ -351,10 +353,10 @@ EmitD2ERIDivided(_l1, _l2, _l3, _l4, _o) <-- [
     Echo("}");
 ];
 
-// ToFile("test.cpp") [
-//     Echo("#include<cmath>");
-//     Echo("double Pi = 3.0;");
-//     EmitD2ERIDivided( 1, 0, 0, 0, {1, 1});
+ToFile("test.cpp") [
+    Echo("#include<cmath>");
+    Echo("double Pi = 3.0;");
+    EmitD2ERIDivided( 1, 1, 0, 0, {1, 1});
 
-//     Echo("int main() {} ;");
-// ];
+    Echo("int main() {} ;");
+];
