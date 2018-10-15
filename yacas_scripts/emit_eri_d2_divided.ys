@@ -173,26 +173,34 @@ EmitD2ERIDivided(_l1, _l2, _l3, _l4, _o) <-- [
     // Echo(derivE);
     // csl := MoveAtoms2Csl(derivE, csl);
     // Echo("//G wczesjniej" : g);
+    // Echo("//csl po petli: ":csl);
+    // Echo("//g po petli: ": g);
+    // Echo("//dE po petli: ":derivE);
+    // Echo("//d2r2 po petli ": d2r2);
+    // Echo("//dr2 po peli: " : dr2);
+    // Echo("//r2 po petli: ":r2);
+    // Echo("//c2h po petli: ":ints);
     { g, csl } := EchoSubfunction("derivE", l1, l2, l3, l4, o, derivE, "DerivE", "HoldERI", ints,  g, "dE", csl);
     // Echo("//G ":g);
+    // Echo("//csl po derivE: ":csl);
     //###################d2r2#############################
 
     { g, csl } := EchoSubfunction("d2r2", l1, l2, l3, l4, o, d2r2, "d2R2e", g, "d2r2", csl);
-
+    // Echo("//csl po d2r2: ":csl);
     //#######################dr2##############################
 
     { g, csl } := EchoSubfunction("dr2", l1, l2, l3, l4, o, dr2, "dR2el", g, "dr2", csl);
-
+    // Echo("//csl po dr2: ":csl);
     // ########################r2##############################
  
     { g, csl } := EchoSubfunction("r2", l1, l2, l3, l4, o, r2, "R", g, "r2", csl);
 
     //#######################Cart2Herm#######################
-    Echo("//csl przed c2h: ":csl);
-    Echo("//csl przed g: ":g);
+    // Echo("//csl po r2: ":csl);
+    //Echo("//csl przed g: ":g);
     { g, csl } := EchoSubfunction("cart2herm", l1, l2, l3, l4, o, ints, "Cart2HermExpCoeff", g, "c2h", csl);
-    Echo("//csl po c2h: ":csl);
-    Echo("//csl po g: ":g);
+    // Echo("//csl po c2h: ":csl);
+    //Echo("//csl po g: ":g);
     // Echo("//g na koniec : ":g);
     //#################Koniec###############################
 
@@ -353,10 +361,10 @@ EmitD2ERIDivided(_l1, _l2, _l3, _l4, _o) <-- [
     Echo("}");
 ];
 
-ToFile("test.cpp") [
-    Echo("#include<cmath>");
-    Echo("double Pi = 3.0;");
-    EmitD2ERIDivided( 1, 1, 0, 0, {1, 1});
+//ToFile("test.cpp") [
+//    Echo("#include<cmath>");
+//    Echo("double Pi = 3.0;");
+//    EmitD2ERIDivided( 1, 1, 0, 0, {1, 1});
 
-    Echo("int main() {} ;");
-];
+//    Echo("int main() {} ;");
+//];
