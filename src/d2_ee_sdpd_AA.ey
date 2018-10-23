@@ -2,12 +2,12 @@
 #include <cmath>
 /*
 <?
-Use("emit_eri_d2.ys");
+Use("emit_eri_d2_divided.ys");
 ?>
 */
 namespace { 
     const double Pi = M_PI;
 }
 //<?
-EmitD2ERI( 0 , 2 , 1 , 2 , {1 , 1 } ); 
+EmitD2ERIDivided( 0 , 2 , 1 , 2 , {1 , 1 } ); 
 //?>
