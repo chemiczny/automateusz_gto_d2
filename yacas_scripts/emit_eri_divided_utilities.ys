@@ -1,5 +1,5 @@
 EchoSubfunction( _subname, _l1, _l2, _l3, _l4, _o, _expressions, _expr2eval, _g, _subArray, _mainCsl ) <-- [
-	Local(csl, edges, keys);
+	Local(csl, edges, keys, newExpr);
 	
 
     csl := {};
@@ -17,8 +17,11 @@ EchoSubfunction( _subname, _l1, _l2, _l3, _l4, _o, _expressions, _expr2eval, _g,
     i := Length(origExpressions) + 1;
     ForEach (nE, newExpr ) [
         // Echo("    g[" : CppForm(i - 1) : "] = " : String(origExpressions[i][1]) : ";");
-        g := Subst(nE, Atom(subArray:"[" : CppForm(i - 1) : "]")) g;
-        mainCsl := Subst(nE, Atom(subArray:"[" : CppForm(i - 1) : "]")) mainCsl;
+        ForEach( oldVar , nE[2]  ) [
+        	g := Subst(oldVar, Atom(subArray:"[" : CppForm(i - 1) : "]")) g;
+        	mainCsl := Subst(oldVar, Atom(subArray:"[" : CppForm(i - 1) : "]")) mainCsl;
+        ];
+        
         i := i + 1;
     ];
 
@@ -90,7 +93,11 @@ EchoSubfunction( _subname, _l1, _l2, _l3, _l4, _o, _expressions, _expr2eval, _g,
     i := Length(origExpressions) + 1;
     ForEach (nE, newExpr ) [
         // Echo("    g[" : CppForm(i - 1) : "] = " : String(origExpressions[i][1]) : ";");
-        Echo("    g[" : CppForm(i - 1) : "] = " : String(nE) : ";");
+        
+    	g := Subst(nE[1], Atom(subArray:"[" : CppForm(i - 1) : "]")) g;
+    	mainCsl := Subst(nE[1], Atom(subArray:"[" : CppForm(i - 1) : "]")) mainCsl;
+        
+        
         i := i + 1;
     ];
 
@@ -104,13 +111,24 @@ expr2arrayType( _expr, _arrayName) <-- [
 		expr[i][1] := Atom(arrayName : "[" : CppForm(i - 1) : "]") ;
 ];
 
-EchoSubfunction( _subname, _l1, _l2, _l3, _l4, _o, _expressions, _expr2eval, _subexpr2hold, _origSubexpressions, _g, _subArray, _mainCsl ) <-- [
-	Local(csl, edges, keys);
-	subexpressions := DeepCopy(origSubexpressions);
+EchoSubfunction( _subname, _l1, _l2, _l3, _l4, _o, _expressions, _expr2eval, _subexpr2hold, _processedSubexpressions, _subexpressionReplaced, _origSubs , _g, _subArray, _mainCsl ) <-- [
+	Local(csl, edges, keys, newExpr);
+	subexpressions := DeepCopy(_processedSubexpressions);
 
 	For (i := 1, i <= Length(subexpressions), i++) [
 		subexpressions[i][1] := Atom("s[" : CppForm(i - 1) : "]") ;
 	];
+
+	i := Length(subexpressions) + 1;
+
+    ForEach (sr, subexpressionReplaced ) [
+        // Echo("    g[" : CppForm(i - 1) : "] = " : String(origExpressions[i][1]) : ";");
+   		ForEach( oldVar, sr[2] ) [
+   			DestructiveAppend( subexpressions, {  Atom("s[" : CppForm(i - 1) : "]"), origSubs[oldVar]  } );
+   		];
+        
+        i := i + 1;
+    ];
 
     csl := {};
     // Echo("//kurla");
@@ -136,10 +154,13 @@ EchoSubfunction( _subname, _l1, _l2, _l3, _l4, _o, _expressions, _expr2eval, _su
     ];
 
     i := Length(origExpressions) + 1;
+
     ForEach (nE, newExpr ) [
         // Echo("    g[" : CppForm(i - 1) : "] = " : String(origExpressions[i][1]) : ";");
-        g := Subst(nE, Atom(subArray:"[" : CppForm(i - 1) : "]")) g;
-        mainCsl := Subst(nE, Atom(subArray:"[" : CppForm(i - 1) : "]")) mainCsl;
+   		oldVar := nE[1];
+    	g := Subst(oldVar, Atom(subArray:"[" : CppForm(i - 1) : "]")) g;
+    	mainCsl := Subst(oldVar, Atom(subArray:"[" : CppForm(i - 1) : "]")) mainCsl;
+        
         i := i + 1;
     ];
 
@@ -215,10 +236,14 @@ EchoSubfunction( _subname, _l1, _l2, _l3, _l4, _o, _expressions, _expr2eval, _su
     i := Length(origExpressions) + 1;
     ForEach (nE, newExpr ) [
         // Echo("    g[" : CppForm(i - 1) : "] = " : String(origExpressions[i][1]) : ";");
-        Echo("    g[" : CppForm(i - 1) : "] = " : String(nE) : ";");
+        
+    	g := Subst(nE[1], Atom(subArray:"[" : CppForm(i - 1) : "]")) g;
+    	mainCsl := Subst(nE[1], Atom(subArray:"[" : CppForm(i - 1) : "]")) mainCsl;
+        
+        
         i := i + 1;
     ];
 
     Echo("};");
-    { g, mainCsl };
+    { g, mainCsl, origExpressions, newExpr };
 ];

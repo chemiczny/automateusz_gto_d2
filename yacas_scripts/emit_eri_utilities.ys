@@ -46,6 +46,7 @@ MoveAtoms2Csl(_exprList, _csl, _g) <-- [
 ];
 
 MoveAtoms2Csl2(_exprList, _csl, _g, _mainCsl) <-- [
+	Local(i, newExpr);
     i := 1;
     newExpr := {};
     While (i <= Length(exprList)) [
@@ -57,8 +58,15 @@ MoveAtoms2Csl2(_exprList, _csl, _g, _mainCsl) <-- [
             g := Subst(c, v) g;
             csl := Subst(c, v) csl;
             mainCsl := Subst(c, v) mainCsl;
+	    	// DestructiveReplace(exprList, i, {c, {*,1,v} });
             DestructiveDelete(exprList, i);
-            If( Not IsNumber(v) , DestructiveAppend(newExpr, v), Echo("//Atom i liczba: ":c : v)  );
+            If( Not IsNumber(v) , 
+                If ( Assoc( v, newExpr ) = Empty, 
+                    newExpr[v] := {c},
+                    DestructiveAppend( newExpr[v], c  )
+                )
+            );
+	   		// i := i + 1;
         ], [
             DestructiveReplace(exprList, i, {c, Listify(v)});
             i := i + 1;
