@@ -17,10 +17,11 @@ EchoSubfunction( _subname, _l1, _l2, _l3, _l4, _o, _expressions, _expr2eval, _g,
     i := Length(origExpressions) + 1;
     ForEach (nE, newExpr ) [
         // Echo("    g[" : CppForm(i - 1) : "] = " : String(origExpressions[i][1]) : ";");
-        ForEach( oldVar , nE[2]  ) [
-        	g := Subst(oldVar, Atom(subArray:"[" : CppForm(i - 1) : "]")) g;
-        	mainCsl := Subst(oldVar, Atom(subArray:"[" : CppForm(i - 1) : "]")) mainCsl;
-        ];
+        oldVar := Atom(nE[1]);
+
+    	g := Subst(oldVar, Atom(subArray:"[" : CppForm(i - 1) : "]")) g;
+    	mainCsl := Subst(oldVar, Atom(subArray:"[" : CppForm(i - 1) : "]")) mainCsl;
+
         
         i := i + 1;
     ];
@@ -94,8 +95,7 @@ EchoSubfunction( _subname, _l1, _l2, _l3, _l4, _o, _expressions, _expr2eval, _g,
     ForEach (nE, newExpr ) [
         // Echo("    g[" : CppForm(i - 1) : "] = " : String(origExpressions[i][1]) : ";");
         
-    	g := Subst(nE[1], Atom(subArray:"[" : CppForm(i - 1) : "]")) g;
-    	mainCsl := Subst(nE[1], Atom(subArray:"[" : CppForm(i - 1) : "]")) mainCsl;
+    	Echo("    g[" : CppForm(i - 1) : "] = " : nE[1] : ";" );
         
         
         i := i + 1;
@@ -141,7 +141,7 @@ EchoSubfunction( _subname, _l1, _l2, _l3, _l4, _o, _expressions, _expr2eval, _su
 
     ForEach (nE, newExpr ) [
         // Echo("    g[" : CppForm(i - 1) : "] = " : String(origExpressions[i][1]) : ";");
-   		oldVar := nE[1];
+   		oldVar := Atom(nE[1]);
     	g := Subst(oldVar, Atom(subArray:"[" : CppForm(i - 1) : "]")) g;
     	mainCsl := Subst(oldVar, Atom(subArray:"[" : CppForm(i - 1) : "]")) mainCsl;
         
@@ -221,8 +221,7 @@ EchoSubfunction( _subname, _l1, _l2, _l3, _l4, _o, _expressions, _expr2eval, _su
     ForEach (nE, newExpr ) [
         // Echo("    g[" : CppForm(i - 1) : "] = " : String(origExpressions[i][1]) : ";");
         
-    	g := Subst(nE[1], Atom(subArray:"[" : CppForm(i - 1) : "]")) g;
-    	mainCsl := Subst(nE[1], Atom(subArray:"[" : CppForm(i - 1) : "]")) mainCsl;
+        Echo("    g[" : CppForm(i - 1) : "] = " : nE[1] : ";" );
         
         
         i := i + 1;

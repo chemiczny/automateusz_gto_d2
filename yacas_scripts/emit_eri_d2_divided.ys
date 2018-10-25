@@ -200,6 +200,8 @@ EmitD2ERIDivided(_l1, _l2, _l3, _l4, _o) <-- [
     //Echo("//csl przed g: ":g);
     { g, csl, c2hProcessed, c2hReplaced } := EchoSubfunction("cart2herm", l1, l2, l3, l4, o, ints, "Cart2HermExpCoeff", g, "c2h", csl);
 
+
+    Echo("// przed zastapieniem ": ints);
     i := 0;
     ForEach(  cp , c2hProcessed  ) [
     	ints := Subst( cp[1], Atom("s[" : CppForm(i ) : "]") ) ints;
@@ -207,16 +209,16 @@ EmitD2ERIDivided(_l1, _l2, _l3, _l4, _o) <-- [
     ];
 
     ForEach(  cp , c2hReplaced  ) [
-	    ForEach( c , cp2 ) [
-	    	ints := Subst( cp, Atom("s[" : CppForm(i) : "]") ) ints;
+	    ForEach( c , cp[2] ) [
+	    	ints := Subst( c, Atom("s[" : CppForm(i) : "]") ) ints;
 	    ];
     	i := i+1;
     ];
 
     // Echo("tolololo"):
-    // Echo(c2hProcessed);
-    // Echo(c2hReplaced);
-    // Echo(ints);
+    Echo("// processs " : c2hProcessed);
+    Echo("// replaced " : c2hReplaced);
+    Echo("// po zastapieniu " : ints);
 
     { g, csl, dEprocessed, dEreplaced } := EchoSubfunction("derivE", l1, l2, l3, l4, o, derivE, "DerivE", "HoldERI", ints ,  g, "dE", csl);
     // Echo("//csl po c2h: ":csl);
@@ -264,11 +266,11 @@ EmitD2ERIDivided(_l1, _l2, _l3, _l4, _o) <-- [
     Echo("    const double yQ = (ce * yC + de * yD) / q;");
     Echo("    const double zQ = (ce * zC + de * zD) / q;");
 
-    Echo("    double dE[": String(Length(derivE)): "];");
-    Echo("    double d2r2[": String(Length(d2r2)): "];");
-    Echo("    double dr2[": String(Length(dr2)): "];");
-    Echo("    double r2[": String(Length(r2)): "];");
-    Echo("    double c2h[": String(Length(ints)): "];");
+    Echo("    double dE[": String(Length(dEprocessed) + Length(dEreplaced)): "];");
+    Echo("    double d2r2[": String(Length(d2r2processed) + Length(d2r2replaced)): "];");
+    Echo("    double dr2[": String(Length(dr2processed) + Length(dr2processed)): "];");
+    Echo("    double r2[": String(Length(r2processed) + Length(r2replaced)): "];");
+    Echo("    double c2h[": String(Length(c2hProcessed) + Length(c2hReplaced)): "];");
 
     Echo("    second_derivative_ee_" : CppForm(l1) : CppForm(l2) : CppForm(l3) : CppForm(l4) : "_" : CppForm(o[1]): CppForm(o[2]) : "_d2r2(");
     Echo("    ae, xA, yA, zA, be, xB, yB, zB, ce, xC, yC, zC, de, xD, yD, zD, bs, d2r2);");
@@ -381,10 +383,10 @@ EmitD2ERIDivided(_l1, _l2, _l3, _l4, _o) <-- [
     Echo("}");
 ];
 
-ToFile("test.cpp") [
-   Echo("#include<cmath>");
-   Echo("double Pi = 3.0;");
-   EmitD2ERIDivided( 1, 0, 0, 0, {1, 1});
+// ToFile("test.cpp") [
+//    Echo("#include<cmath>");
+//    Echo("double Pi = 3.0;");
+//    EmitD2ERIDivided( 2, 1, 0, 0, {1, 1});
 
-   Echo("int main() {} ;");
-];
+//    Echo("int main() {} ;");
+// ];

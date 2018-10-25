@@ -62,8 +62,8 @@ MoveAtoms2Csl2(_exprList, _csl, _g, _mainCsl) <-- [
             DestructiveDelete(exprList, i);
             If( Not IsNumber(v) , 
                 If ( Assoc( v, newExpr ) = Empty, 
-                    newExpr[v] := {c},
-                    DestructiveAppend( newExpr[v], c  )
+                    newExpr[String(v)] := {c},
+                    DestructiveAppend( newExpr[String(v)], c  )
                 )
             );
 	   		// i := i + 1;
