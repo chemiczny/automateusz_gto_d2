@@ -4,7 +4,7 @@ EchoSubfunction( _subname, _l1, _l2, _l3, _l4, _o, _expressions, _expr2eval, _g,
 
     csl := {};
     // Echo("//wyrazenia":expressions);
-    { expressions, csl} := EvalSubexpression( expressions, expr2eval, csl  );
+    { expressions, csl} := EvalSubexpression( DeepCopy(expressions), expr2eval, csl  );
     // Echo("//znowu wyrazenia ": expressions);
     { csl, g, expressions, newExpr, mainCsl } := MoveAtoms2Csl2(expressions, csl, g, mainCsl);
     origExpressions := DeepCopy(expressions);
@@ -103,7 +103,7 @@ EchoSubfunction( _subname, _l1, _l2, _l3, _l4, _o, _expressions, _expr2eval, _g,
 
 
     Echo("};");
-    {g , mainCsl };
+    { g, mainCsl, origExpressions, newExpr };
 ];
 
 expr2arrayType( _expr, _arrayName) <-- [
@@ -111,30 +111,14 @@ expr2arrayType( _expr, _arrayName) <-- [
 		expr[i][1] := Atom(arrayName : "[" : CppForm(i - 1) : "]") ;
 ];
 
-EchoSubfunction( _subname, _l1, _l2, _l3, _l4, _o, _expressions, _expr2eval, _subexpr2hold, _processedSubexpressions, _subexpressionReplaced, _origSubs , _g, _subArray, _mainCsl ) <-- [
+EchoSubfunction( _subname, _l1, _l2, _l3, _l4, _o, _expressions, _expr2eval, _subexpr2hold, _origSubs , _g, _subArray, _mainCsl ) <-- [
 	Local(csl, edges, keys, newExpr);
-	subexpressions := DeepCopy(_processedSubexpressions);
-
-	For (i := 1, i <= Length(subexpressions), i++) [
-		subexpressions[i][1] := Atom("s[" : CppForm(i - 1) : "]") ;
-	];
-
-	i := Length(subexpressions) + 1;
-
-    ForEach (sr, subexpressionReplaced ) [
-        // Echo("    g[" : CppForm(i - 1) : "] = " : String(origExpressions[i][1]) : ";");
-   		ForEach( oldVar, sr[2] ) [
-   			DestructiveAppend( subexpressions, {  Atom("s[" : CppForm(i - 1) : "]"), origSubs[oldVar]  } );
-   		];
-        
-        i := i + 1;
-    ];
 
     csl := {};
     // Echo("//kurla");
     // // Echo("//": subexpr2hold);
     // Echo("// przed evalem": expressions);
-    { expressions, subexpressions ,csl} := EvalSubexpression( expressions, expr2eval, subexpr2hold , subexpressions ,  csl  );
+    { expressions, origSubs ,csl} := EvalSubexpression( expressions, expr2eval, subexpr2hold , origSubs ,  csl  );
     // // Echo("//kurla mac");
     // Echo("// po evalu": expressions);
 

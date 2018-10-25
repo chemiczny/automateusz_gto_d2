@@ -200,7 +200,25 @@ EmitD2ERIDivided(_l1, _l2, _l3, _l4, _o) <-- [
     //Echo("//csl przed g: ":g);
     { g, csl, c2hProcessed, c2hReplaced } := EchoSubfunction("cart2herm", l1, l2, l3, l4, o, ints, "Cart2HermExpCoeff", g, "c2h", csl);
 
-    { g, csl, dEprocessed, dEreplaced } := EchoSubfunction("derivE", l1, l2, l3, l4, o, derivE, "DerivE", "HoldERI", c2hProcessed, c2hReplaced, ints ,  g, "dE", csl);
+    i := 0;
+    ForEach(  cp , c2hProcessed  ) [
+    	ints := Subst( cp[1], Atom("s[" : CppForm(i ) : "]") ) ints;
+    	i := i+1;
+    ];
+
+    ForEach(  cp , c2hReplaced  ) [
+	    ForEach( c , cp2 ) [
+	    	ints := Subst( cp, Atom("s[" : CppForm(i) : "]") ) ints;
+	    ];
+    	i := i+1;
+    ];
+
+    // Echo("tolololo"):
+    // Echo(c2hProcessed);
+    // Echo(c2hReplaced);
+    // Echo(ints);
+
+    { g, csl, dEprocessed, dEreplaced } := EchoSubfunction("derivE", l1, l2, l3, l4, o, derivE, "DerivE", "HoldERI", ints ,  g, "dE", csl);
     // Echo("//csl po c2h: ":csl);
     //Echo("//csl po g: ":g);
     // Echo("//g na koniec : ":g);
@@ -366,7 +384,7 @@ EmitD2ERIDivided(_l1, _l2, _l3, _l4, _o) <-- [
 ToFile("test.cpp") [
    Echo("#include<cmath>");
    Echo("double Pi = 3.0;");
-   EmitD2ERIDivided( 1, 1, 0, 0, {1, 1});
+   EmitD2ERIDivided( 1, 0, 0, 0, {1, 1});
 
    Echo("int main() {} ;");
 ];
