@@ -54,17 +54,23 @@ MoveAtoms2Csl2(_exprList, _csl, _g, _mainCsl) <-- [
         c := t[1];
         v := t[2];
         If (IsAtom(v), [
-            // Echo("//atom: ":c : " " : v);
+            Echo("//atom: ":String(c) : " " : String(v) );
             g := Subst(c, v) g;
             csl := Subst(c, v) csl;
             mainCsl := Subst(c, v) mainCsl;
 	    	// DestructiveReplace(exprList, i, {c, {*,1,v} });
             DestructiveDelete(exprList, i);
             If( Not IsNumber(v) , 
-                If ( Assoc( v, newExpr ) = Empty, 
-                    newExpr[String(v)] := {c},
-                    DestructiveAppend( newExpr[String(v)], c  )
-                )
+                If ( Assoc( String(v), newExpr ) = Empty, 
+                	[
+                    newExpr[String(v)] := {c};
+                    Echo("// nowy klucz");
+                    ],
+                    [
+                    	DestructiveAppend( newExpr[String(v)], c  );
+                    	Echo("//dokladam do starego klucza");
+                    ]
+                ) 
             );
 	   		// i := i + 1;
         ], [
