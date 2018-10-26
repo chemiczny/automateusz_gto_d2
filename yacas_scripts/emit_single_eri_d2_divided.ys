@@ -1,0 +1,363 @@
+Use("hessian_two_electrons_coulomb.ys");
+Use("cse.ys");
+Use("cpp_form.ys");
+Use("shells.ys");
+Use("emit_eri_utilities.ys");
+Use("emit_eri_divided_utilities.ys");
+Use("cartesian_to_spherical.ys");
+
+MaxEvalDepth(100000);
+    
+10 # DeepCopy(l_IsList) <-- [
+    Local(r);
+    r := {};
+    ForEach(e, l)
+        DestructiveAppend(r, DeepCopy(e));
+    r;
+];
+
+20 # DeepCopy(_e) <-- e;
+
+UnProtect( FillList );
+Retract(FillList, 2);
+
+10 # FillList(_item, 0) <-- {};
+
+20 # FillList(_item, length_IsPositiveInteger) <-- [
+    Local(i, result);
+    result := {};
+    For(i:=0, i < length, i++)
+        DestructiveInsert(result, 1, DeepCopy(item));
+    result;
+];
+
+Listify(a_IsAtom) <-- a;
+UnList(a_IsAtom) <-- a;
+
+TopologicalSort'Kahn(V_IsList, E_IsList) <-- [
+    Local(n, A, I, S, L, e, v, i, av, R);
+
+    n := Length(V);
+
+    // initialize adjacency list
+    A := FillList({}, n);
+    ForEach (e, E)
+        DestructiveAppend(A[e[1]], e[2]);
+
+    // initialize in-degree list
+    I := FillList(0, n);
+    ForEach (e, Transpose(E)[2])
+        I[e] := I[e] + 1;
+
+    // find nodes with no incoming edges
+    S := {};
+    ForEach (i, 1 .. n)
+        If (I[i] = 0, DestructiveAppend(S, i));
+
+    // sort
+    L := {};
+    While (Length(S) != 0) [
+        v := Head(S);
+        S := Tail(S);
+        DestructiveAppend(L, v);
+        ForEach (av, A[v]) [
+            I[av] := I[av] - 1;
+            If (I[av] = 0, DestructiveAppend(S, av));
+        ];
+    ];
+
+    Check(Length(L) = Length(V), "topological sort: cycle detected");
+
+    // translate the result
+    For (i := 1, i <= n, i++)
+        DestructiveReplace(L, i, V[L[i]]);
+
+    L;
+];
+
+EmitSingleD2ERIDivided(_l1, _l2, _l3, _l4, _o, _dcoords ) <-- [
+   //If (l1 + l2 + l3 + l4 > 5, [
+        Echo("#pragma GCC optimize (\"O0\")");
+        //Echo("#pragma GCC optimize (\"no-expensive-optimizations\")");
+        //Echo("#pragma GCC optimize (\"no-unit-at-a-time\")");
+    //]);
+
+    nc1 := (l1 + 1) * (l1 + 2) / 2;
+    nc2 := (l2 + 1) * (l2 + 2) / 2;
+    nc3 := (l3 + 1) * (l3 + 2) / 2;
+    nc4 := (l4 + 1) * (l4 + 2) / 2;
+
+    ns1 := 2 * l1 + 1;
+    ns2 := 2 * l2 + 1;
+    ns3 := 2 * l3 + 1;
+    ns4 := 2 * l4 + 1;
+
+    Local(i,j,k,l, csl, ints, derivE, d2r2, dr2, r2, h, g, extract);
+
+    postfixes := {"x", "y", "z"};
+
+    g := FillList(FillList(FillList(FlatCopy(FillList(0, nc4)), nc3), nc2), nc1);
+    //gs := FillList(FillList(FillList(FillList(FlatCopy(FillList(0, 9)), ns4), ns3), ns2), ns1);
+
+    csl := {};
+    ints := {};
+    derivE := {};
+    d2r2 := {};
+    dr2 := {};
+    r2 := {};
+    h := {};
+
+    //components := { {1,1}, {1,2}, {1,3}, {2, 1}, {2,2}, {2,3}, {3, 1}, {3,2}, {3,3} };
+    d2result := "d2ee";
+    //numOfCases:=9;
+    
+    i := 1;
+    ForEach(m1, Shells[l1 + 1]) [
+        j := 1;
+        ForEach(m2, Shells[l2 + 1]) [
+            k := 1;
+            ForEach(m3, Shells[l3 + 1]) [
+                l := 1;
+                ForEach(m4, Shells[l4 + 1]) [
+                    //caseIt := 1;
+                    //ForEach( caseInd , components) [
+  
+                        args := {"HoldERI", "holdDerivE", "holdD2R2e", "holdDR2el", "holdR",  m1, ae, m2, be, {xA, yA, zA}, {xB, yB, zB},m3, ce, 
+                             m4, de, {xC, yC, zC}, {xD, yD, zD}, p, q, bs, {xP, yP, zP}, {xQ, yQ, zQ},
+                             dcoords, o};
+
+                        //wywolanie funkcji liczacej pochodne
+                        h := (hessian'coulomb'twoelectrons'part @ args);
+                        
+                        //znajduje wspolczynniki cart2herm, ktore juz sie pojawily
+
+                        h := CSE'SubstituteTaggedSubexpressions(ints, h); 
+                        h := CSE'SubstituteTaggedSubexpressions(derivE, h);
+                        h := CSE'SubstituteTaggedSubexpressions(d2r2, h);
+                        h := CSE'SubstituteTaggedSubexpressions(dr2, h);
+                        h := CSE'SubstituteTaggedSubexpressions(r2, h);
+                        
+                        {extract, h} := CSE'ExtractMulti(h, {"HoldERI", "holdDerivE",  "holdR",  "holdDR2el", "holdD2R2e" } ); 
+
+                        ints := Concat(ints, extract[1]);
+                        derivE := Concat( derivE, extract[2] );
+                        d2r2 := Concat( d2r2, extract[5] );
+                        dr2 := Concat( dr2, extract[4] );
+                        r2 := Concat( r2, extract[3] );
+                        
+                        //znajduje wyrazenia proste, ktore juz sie pojawily
+                        h := CSE'SubstituteTaggedSubexpressions(csl, h);
+                        
+                        {h, t} := CSE(h);
+
+                        csl := Concat(csl, t);
+
+                        g[i][j][k][l] := h;
+                        //caseIt := caseIt + 1;
+                   // ];
+                    l := l + 1;
+                ];
+                k := k + 1;
+            ];
+            j := j + 1;
+        ];
+        i := i + 1;
+    ];
+    // Echo(csl);
+    // origDerivE := DeepCopy(derivE);
+    // derivEcsl := {};
+    // {derivE, ints, csl} := EvalSubexpression( derivE, "DerivE", "HoldERI", ints, derivEcsl  );
+    // Echo("derivE");
+    // Echo(derivE);
+    // csl := MoveAtoms2Csl(derivE, csl);
+    // Echo("//G wczesjniej" : g);
+    // Echo("//csl po petli: ":csl);
+    // Echo("//g po petli: ": g);
+    // Echo("//dE po petli: ":derivE);
+    // Echo("//d2r2 po petli ": d2r2);
+    // Echo("//dr2 po peli: " : dr2);
+    // Echo("//r2 po petli: ":r2);
+    // Echo("//c2h po petli: ":ints);
+    
+    // Echo("//G ":g);
+    // Echo("//csl po derivE: ":csl);
+    //###################d2r2#############################
+
+    { g, csl, d2r2processed, d2r2replaced } := EchoSubfunction("d2r2", l1, l2, l3, l4, o, d2r2, "d2R2e", g, "d2r2", csl);
+    // Echo("//csl po d2r2: ":csl);
+    //#######################dr2##############################
+
+    { g, csl, dr2processed, dr2replaced } := EchoSubfunction("dr2", l1, l2, l3, l4, o, dr2, "dR2el", g, "dr2", csl);
+    // Echo("//csl po dr2: ":csl);
+    // ########################r2##############################
+ 
+    { g, csl, r2processed, r2replaced } := EchoSubfunction("r2", l1, l2, l3, l4, o, r2, "R", g, "r2", csl);
+
+    //#######################Cart2Herm#######################
+    // Echo("//csl po r2: ":csl);
+    //Echo("//csl przed g: ":g);
+    { g, csl, c2hProcessed, c2hReplaced } := EchoSubfunction("cart2herm", l1, l2, l3, l4, o, ints, "Cart2HermExpCoeff", g, "c2h", csl);
+
+
+    Echo("// przed zastapieniem ": ints);
+    i := 0;
+    ForEach(  cp , c2hProcessed  ) [
+    	ints := Subst( cp[1], Atom("s[" : CppForm(i ) : "]") ) ints;
+    	i := i+1;
+    ];
+
+    ForEach(  cp , c2hReplaced  ) [
+	    ForEach( c , cp[2] ) [
+	    	ints := Subst( c, Atom("s[" : CppForm(i) : "]") ) ints;
+	    ];
+    	i := i+1;
+    ];
+
+    // Echo("tolololo"):
+    Echo("// processs " : c2hProcessed);
+    Echo("// replaced " : c2hReplaced);
+    Echo("// po zastapieniu " : ints);
+
+    { g, csl, dEprocessed, dEreplaced } := EchoSubfunction("derivE", l1, l2, l3, l4, o, derivE, "DerivE", "HoldERI", ints ,  g, "dE", csl);
+    // Echo("//csl po c2h: ":csl);
+    //Echo("//csl po g: ":g);
+    // Echo("//g na koniec : ":g);
+    //#################Koniec###############################
+
+    Echo("void second_derivative_ee_" : CppForm(l1) : CppForm(l2) : CppForm(l3) : CppForm(l4) : "_" : CppForm(o[1]): CppForm(o[2]) : "_" : CppForm(dcoords[1]) : CppForm(dcoords[2]): "(");
+    Echo("    const double ae,");
+    Echo("    const double xA,");
+    Echo("    const double yA,");
+    Echo("    const double zA,");
+    Echo("    const double be,");
+    Echo("    const double xB,");
+    Echo("    const double yB,");
+    Echo("    const double zB,");
+    Echo("    const double ce,");
+    Echo("    const double xC,");
+    Echo("    const double yC,");
+    Echo("    const double zC,");
+    Echo("    const double de,");
+    Echo("    const double xD,");
+    Echo("    const double yD,");
+    Echo("    const double zD,");
+    Echo("    const double* const bs,");
+    Echo("    double* const d2ee)");
+    Echo("{");
+
+    Echo("    const double p = ae + be;");
+    Echo("    const double q = ce + de;");
+
+    Echo("    const double xP = (ae * xA + be * xB) / p;");
+    Echo("    const double yP = (ae * yA + be * yB) / p;");
+    Echo("    const double zP = (ae * zA + be * zB) / p;");
+
+    Echo("    const double xQ = (ce * xC + de * xD) / q;");
+    Echo("    const double yQ = (ce * yC + de * yD) / q;");
+    Echo("    const double zQ = (ce * zC + de * zD) / q;");
+
+    Echo("    double dE[": String(Length(dEprocessed) + Length(dEreplaced)): "];");
+    Echo("    double d2r2[": String(Length(d2r2processed) + Length(d2r2replaced)): "];");
+    Echo("    double dr2[": String(Length(dr2processed) + Length(dr2processed)): "];");
+    Echo("    double r2[": String(Length(r2processed) + Length(r2replaced)): "];");
+    Echo("    double c2h[": String(Length(c2hProcessed) + Length(c2hReplaced)): "];");
+
+    Echo("    second_derivative_ee_" : CppForm(l1) : CppForm(l2) : CppForm(l3) : CppForm(l4) : "_" : CppForm(o[1]): CppForm(o[2]) : "_d2r2(");
+    Echo("    ae, xA, yA, zA, be, xB, yB, zB, ce, xC, yC, zC, de, xD, yD, zD, bs, d2r2);");
+
+    Echo("    second_derivative_ee_" : CppForm(l1) : CppForm(l2) : CppForm(l3) : CppForm(l4) : "_" : CppForm(o[1]): CppForm(o[2]) : "_dr2(");
+    Echo("    ae, xA, yA, zA, be, xB, yB, zB, ce, xC, yC, zC, de, xD, yD, zD, bs, dr2);");
+
+    Echo("    second_derivative_ee_" : CppForm(l1) : CppForm(l2) : CppForm(l3) : CppForm(l4) : "_" : CppForm(o[1]): CppForm(o[2]) : "_r2(");
+    Echo("    ae, xA, yA, zA, be, xB, yB, zB, ce, xC, yC, zC, de, xD, yD, zD, bs, r2);");
+
+    Echo("    second_derivative_ee_" : CppForm(l1) : CppForm(l2) : CppForm(l3) : CppForm(l4) : "_" : CppForm(o[1]): CppForm(o[2]) : "_cart2herm(");
+    Echo("    ae, xA, yA, zA, be, xB, yB, zB, ce, xC, yC, zC, de, xD, yD, zD, bs, c2h);");
+
+    Echo("    second_derivative_ee_" : CppForm(l1) : CppForm(l2) : CppForm(l3) : CppForm(l4) : "_" : CppForm(o[1]): CppForm(o[2]) : "_derivE(");
+    Echo("    ae, xA, yA, zA, be, xB, yB, zB, ce, xC, yC, zC, de, xD, yD, zD, bs, c2h, dE);");
+
+    g := CSE'SubstituteTaggedSubexpressions(csl, g);
+    {g, c} := CSE(g);
+    csl := Concat(csl, c);
+
+    edges := {};
+    //keys := Transpose(csl)[1];
+    keys := Association'Create();
+    t:= Transpose(csl)[1];
+    ForEach(i, 1 .. Length(t))
+        Association'Set(keys, t[i], i);
+    
+    ForEach (i, 1 .. Length(csl)) [
+        vars := VarList(Eval(UnList(csl[i][2])));
+
+        ForEach (var, vars) [
+            j := Association'Get(keys, var);
+            //j := Find(keys, var);
+            If (j > 0, DestructiveAppend(edges, {j, i}));
+        ];
+
+    ];
+
+    //Echo("//Do sortowania topologicznego wchodzi: csl", csl);
+    //Echo("//Do sortowania topologicznego wchodzi: edges ", edges);
+
+    csl := TopologicalSort'Kahn(csl, edges);
+
+    //Echo("//Z sortowania topologicznego wychodzi: csl ", csl);
+    //Echo("//Czas: sortowanie topologiczne: ",time8);
+
+    ForEach(d, CSE'EmitDefinitions(CSE'GenerateAssignments(csl)))
+            WriteString("    " : d : Nl());
+    
+    A1 := CartesianToSphericalMatrix[l1 + 1];
+    A2 := CartesianToSphericalMatrix[l2 + 1];
+    A3 := CartesianToSphericalMatrix[l3 + 1];
+    A4 := CartesianToSphericalMatrix[l4 + 1];
+
+    resultWritten := 0;
+
+    For(i' := 0, i' < 2 * l1 + 1, i'++) [
+        For(j' := 0, j' < 2 * l2 + 1, j'++) [
+            For(k' := 0, k' < 2 * l3 + 1, k'++) [
+                For(l' := 0, l' < 2 * l4 + 1, l'++) [
+                    newResult := 0;
+                    For(i := 0, i < (l1 + 1) * (l1 + 2) / 2, i++) [
+                        If ( Not IsZero(N(A1[i'+1][i+1])),
+                            For(j := 0, j < (l2 + 1) * (l2 + 2) / 2, j++) [
+                                If ( Not IsZero(N(A2[j'+1][j+1] )) ,
+                                    For(k := 0, k < (l3 + 1) * (l3 + 2) / 2, k++) [
+                                        If ( Not IsZero(N(A3[k'+1][k+1] )) ,
+                                            For(l := 0, l < (l4 + 1) * (l4 + 2) / 2, l++) [
+
+                                                a := A1[i'+1][i+1] * A2[j'+1][j+1] * A3[k'+1][k+1] * A4[l'+1][l+1];
+
+                                                a := N(a);
+                                                If (Not IsZero(a),
+                                                    newResult := newResult + a * g[i + 1][j + 1][k + 1][l + 1]
+                                                );
+                                            ]
+                                        );
+                                    ]
+                                );
+                            ]
+                        );
+                    ];
+                        WriteString("    ":d2result:"[" : String(resultWritten) : "] += " : CppForm(newResult) : ";" : Nl());
+                    resultWritten := resultWritten+1;
+                ];
+            ];
+        ];
+    ];
+    
+    
+    Echo("}");
+];
+
+// ToFile("test.cpp") [
+//    Echo("#include<cmath>");
+//    Echo("double Pi = 3.0;");
+//    EmitSingleD2ERIDivided( 1, 1, 0, 0, {1, 1}, {1,2});
+
+//    Echo("int main() {} ;");
+// ];
