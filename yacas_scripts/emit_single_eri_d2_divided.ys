@@ -183,20 +183,20 @@ EmitSingleD2ERIDivided(_l1, _l2, _l3, _l4, _o, _dcoords ) <-- [
     // Echo("//csl po derivE: ":csl);
     //###################d2r2#############################
 
-    { g, csl, d2r2processed, d2r2replaced } := EchoSubfunction("d2r2", l1, l2, l3, l4, o, d2r2, "d2R2e", g, "d2r2", csl);
+    { g, csl, d2r2processed, d2r2replaced } := EchoSubfunction( CppForm(dcoords[1]) : CppForm(dcoords[2]): "_d2r2", l1, l2, l3, l4, o, d2r2, "d2R2e", g, "d2r2", csl);
     // Echo("//csl po d2r2: ":csl);
     //#######################dr2##############################
 
-    { g, csl, dr2processed, dr2replaced } := EchoSubfunction("dr2", l1, l2, l3, l4, o, dr2, "dR2el", g, "dr2", csl);
+    { g, csl, dr2processed, dr2replaced } := EchoSubfunction(CppForm(dcoords[1]) : CppForm(dcoords[2]):"_dr2", l1, l2, l3, l4, o, dr2, "dR2el", g, "dr2", csl);
     // Echo("//csl po dr2: ":csl);
     // ########################r2##############################
  
-    { g, csl, r2processed, r2replaced } := EchoSubfunction("r2", l1, l2, l3, l4, o, r2, "R", g, "r2", csl);
+    { g, csl, r2processed, r2replaced } := EchoSubfunction(CppForm(dcoords[1]) : CppForm(dcoords[2]):"_r2", l1, l2, l3, l4, o, r2, "R", g, "r2", csl);
 
     //#######################Cart2Herm#######################
     // Echo("//csl po r2: ":csl);
     //Echo("//csl przed g: ":g);
-    { g, csl, c2hProcessed, c2hReplaced } := EchoSubfunction("cart2herm", l1, l2, l3, l4, o, ints, "Cart2HermExpCoeff", g, "c2h", csl);
+    { g, csl, c2hProcessed, c2hReplaced } := EchoSubfunction(CppForm(dcoords[1]) : CppForm(dcoords[2]):"_cart2herm", l1, l2, l3, l4, o, ints, "Cart2HermExpCoeff", g, "c2h", csl);
 
 
     Echo("// przed zastapieniem ": ints);
@@ -218,7 +218,7 @@ EmitSingleD2ERIDivided(_l1, _l2, _l3, _l4, _o, _dcoords ) <-- [
     Echo("// replaced " : c2hReplaced);
     Echo("// po zastapieniu " : ints);
 
-    { g, csl, dEprocessed, dEreplaced } := EchoSubfunction("derivE", l1, l2, l3, l4, o, derivE, "DerivE", "HoldERI", ints ,  g, "dE", csl);
+    { g, csl, dEprocessed, dEreplaced } := EchoSubfunction(CppForm(dcoords[1]) : CppForm(dcoords[2]):"_derivE", l1, l2, l3, l4, o, derivE, "DerivE", "HoldERI", ints ,  g, "dE", csl);
     // Echo("//csl po c2h: ":csl);
     //Echo("//csl po g: ":g);
     // Echo("//g na koniec : ":g);
@@ -262,19 +262,19 @@ EmitSingleD2ERIDivided(_l1, _l2, _l3, _l4, _o, _dcoords ) <-- [
     Echo("    double r2[": String(Length(r2processed) + Length(r2replaced)): "];");
     Echo("    double c2h[": String(Length(c2hProcessed) + Length(c2hReplaced)): "];");
 
-    Echo("    second_derivative_ee_" : CppForm(l1) : CppForm(l2) : CppForm(l3) : CppForm(l4) : "_" : CppForm(o[1]): CppForm(o[2]) : "_d2r2(");
+    Echo("    second_derivative_ee_" : CppForm(l1) : CppForm(l2) : CppForm(l3) : CppForm(l4) : "_" : CppForm(o[1]): CppForm(o[2]) : "_" : CppForm(dcoords[1]) : CppForm(dcoords[2]): "_d2r2(");
     Echo("    ae, xA, yA, zA, be, xB, yB, zB, ce, xC, yC, zC, de, xD, yD, zD, bs, d2r2);");
 
-    Echo("    second_derivative_ee_" : CppForm(l1) : CppForm(l2) : CppForm(l3) : CppForm(l4) : "_" : CppForm(o[1]): CppForm(o[2]) : "_dr2(");
+    Echo("    second_derivative_ee_" : CppForm(l1) : CppForm(l2) : CppForm(l3) : CppForm(l4) : "_" : CppForm(o[1]): CppForm(o[2]) : "_" : CppForm(dcoords[1]) : CppForm(dcoords[2]): "_dr2(");
     Echo("    ae, xA, yA, zA, be, xB, yB, zB, ce, xC, yC, zC, de, xD, yD, zD, bs, dr2);");
 
-    Echo("    second_derivative_ee_" : CppForm(l1) : CppForm(l2) : CppForm(l3) : CppForm(l4) : "_" : CppForm(o[1]): CppForm(o[2]) : "_r2(");
+    Echo("    second_derivative_ee_" : CppForm(l1) : CppForm(l2) : CppForm(l3) : CppForm(l4) : "_" : CppForm(o[1]): CppForm(o[2]) : "_" : CppForm(dcoords[1]) : CppForm(dcoords[2]): "_r2(");
     Echo("    ae, xA, yA, zA, be, xB, yB, zB, ce, xC, yC, zC, de, xD, yD, zD, bs, r2);");
 
-    Echo("    second_derivative_ee_" : CppForm(l1) : CppForm(l2) : CppForm(l3) : CppForm(l4) : "_" : CppForm(o[1]): CppForm(o[2]) : "_cart2herm(");
+    Echo("    second_derivative_ee_" : CppForm(l1) : CppForm(l2) : CppForm(l3) : CppForm(l4) : "_" : CppForm(o[1]): CppForm(o[2]) : "_" : CppForm(dcoords[1]) : CppForm(dcoords[2]): "_cart2herm(");
     Echo("    ae, xA, yA, zA, be, xB, yB, zB, ce, xC, yC, zC, de, xD, yD, zD, bs, c2h);");
 
-    Echo("    second_derivative_ee_" : CppForm(l1) : CppForm(l2) : CppForm(l3) : CppForm(l4) : "_" : CppForm(o[1]): CppForm(o[2]) : "_derivE(");
+    Echo("    second_derivative_ee_" : CppForm(l1) : CppForm(l2) : CppForm(l3) : CppForm(l4) : "_" : CppForm(o[1]): CppForm(o[2]) : "_" : CppForm(dcoords[1]) : CppForm(dcoords[2]): "_derivE(");
     Echo("    ae, xA, yA, zA, be, xB, yB, zB, ce, xC, yC, zC, de, xD, yD, zD, bs, c2h, dE);");
 
     g := CSE'SubstituteTaggedSubexpressions(csl, g);
