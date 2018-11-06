@@ -1,5 +1,6 @@
+Use("emitGgroup.ys");
 //inline
-EchoSubfunctionBigL(  _l1, _l2, _l3, _l4, _o, _ints , _g, _csl , _r2processed, _r2replaced, _c2hProcessed, _c2hReplaced, _d2r2, _dr2, _derivE, _d2result  ) <-- [
+EchoSubfunctionBigLDivided(  _l1, _l2, _l3, _l4, _o, _groups, _ints , _g, _csl , _r2processed, _r2replaced, _c2hProcessed, _c2hReplaced, _d2r2, _dr2, _derivE, _d2result  ) <-- [
 	{ g, csl, d2r2processed, d2r2replaced } := EchoSubfunction( d2result: "_d2r2", l1, l2, l3, l4, o, d2r2, "d2R2e", g, "d2r2", csl);
     // Echo("//csl po d2r2: ":csl);
     //#######################dr2##############################
@@ -16,6 +17,18 @@ EchoSubfunctionBigL(  _l1, _l2, _l3, _l4, _o, _ints , _g, _csl , _r2processed, _
     //Echo("//csl po g: ":g);
     // Echo("//g na koniec : ":g);
     //#################Koniec###############################
+
+    groupInd := 1;
+    ForEach( group , groups ) [
+        subG := {};
+        ForEach( element , group  ) [
+            DestructiveAppend(subG, g[element[1]][element[2]][element[3]][element[4]] );
+        ];
+
+        EmitGgroup( l1, l2, l3, l4, o, subG, csl[groupInd], d2result, groupInd );
+        groupInd := groupInd + 1;
+    ];
+
 
     Echo("void second_derivative_ee_" : CppForm(l1) : CppForm(l2) : CppForm(l3) : CppForm(l4) : "_" : CppForm(o[1]): CppForm(o[2]) : "_" : d2result: "(");
     Echo("    const double ae,");
@@ -35,6 +48,8 @@ EchoSubfunctionBigL(  _l1, _l2, _l3, _l4, _o, _ints , _g, _csl , _r2processed, _
     Echo("    const double yD,");
     Echo("    const double zD,");
     Echo("    const double* const bs,");
+    Echo("    double* const r2,");
+    Echo("    double* const c2h,");
     Echo("    double* const ": d2result :")");
     Echo("{");
 
@@ -52,8 +67,6 @@ EchoSubfunctionBigL(  _l1, _l2, _l3, _l4, _o, _ints , _g, _csl , _r2processed, _
     Echo("    double dE[": String(Length(dEprocessed) + Length(dEreplaced)): "];");
     Echo("    double d2r2[": String(Length(d2r2processed) + Length(d2r2replaced)): "];");
     Echo("    double dr2[": String(Length(dr2processed) + Length(dr2processed)): "];");
-    Echo("    double r2[": String(Length(r2processed) + Length(r2replaced)): "];");
-    Echo("    double c2h[": String(Length(c2hProcessed) + Length(c2hReplaced)): "];");
 
     Echo("    second_derivative_ee_" : CppForm(l1) : CppForm(l2) : CppForm(l3) : CppForm(l4) : "_" : CppForm(o[1]): CppForm(o[2]) : "_" : d2result: "_d2r2(");
     Echo("    ae, xA, yA, zA, be, xB, yB, zB, ce, xC, yC, zC, de, xD, yD, zD, bs, d2r2);");
@@ -64,39 +77,52 @@ EchoSubfunctionBigL(  _l1, _l2, _l3, _l4, _o, _ints , _g, _csl , _r2processed, _
     Echo("    second_derivative_ee_" : CppForm(l1) : CppForm(l2) : CppForm(l3) : CppForm(l4) : "_" : CppForm(o[1]): CppForm(o[2]) : "_" : d2result: "_derivE(");
     Echo("    ae, xA, yA, zA, be, xB, yB, zB, ce, xC, yC, zC, de, xD, yD, zD, bs, c2h, dE);");
 
-    g := CSE'SubstituteTaggedSubexpressions(csl, g);
-    {g, c} := CSE(g);
-    csl := Concat(csl, c);
-    Echo("//gowno");
-    Echo("//csl": csl);
-    edges := {};
-    //keys := Transpose(csl)[1];
-    keys := Association'Create();
-    t:= Transpose(csl)[1];
-    ForEach(i, 1 .. Length(t))
-        Association'Set(keys, t[i], i);
-    
-    ForEach (i, 1 .. Length(csl)) [
-        vars := VarList(Eval(UnList(csl[i][2])));
+    For( groupInd := 1 , groupInd <= Length(groups) , groupInd := groupInd + 1 ) [
+        group := groups[groupInd];
+        Echo("    double g":CppForm(groupInd) :"[":String(Length(group)):"];");
+        Echo("    second_derivative_ee_" : CppForm(l1) : CppForm(l2) : CppForm(l3) : CppForm(l4) : "_" : CppForm(o[1]): CppForm(o[2]) : "_" : d2result: "_" : CppForm(groupInd) :"(");
+        Echo("    ae, xA, yA, zA, be, xB, yB, zB, ce, xC, yC, zC, de, xD, yD, zD, bs, r2, dr2, d2r2, c2h, dE, g" : CppForm(groupInd)  :" );");
 
-        ForEach (var, vars) [
-            j := Association'Get(keys, var);
-            //j := Find(keys, var);
-            If (j > 0, DestructiveAppend(edges, {j, i}));
+        For( elInd := 1 , elInd <= Length(group) , elInd := elInd +1  ) [
+            element := group[elInd];
+            g[element[1]][element[2]][element[3]][element[4]] := Atom( "g":CppForm(groupInd) :"[":String(elInd):"]" );
         ];
-
+        
     ];
-    Echo("//dupa");
-    Echo("//Do sortowania topologicznego wchodzi: csl", csl);
-    Echo("//Do sortowania topologicznego wchodzi: edges ", edges);
 
-    If (edges != {}, csl := TopologicalSort'Kahn(csl, edges) );
+    // g := CSE'SubstituteTaggedSubexpressions(csl, g);
+    // {g, c} := CSE(g);
+    // csl := Concat(csl, c);
+    // Echo("//gowno");
+    // Echo("//csl": csl);
+    // edges := {};
+    // //keys := Transpose(csl)[1];
+    // keys := Association'Create();
+    // t:= Transpose(csl)[1];
+    // ForEach(i, 1 .. Length(t))
+    //     Association'Set(keys, t[i], i);
+    
+    // ForEach (i, 1 .. Length(csl)) [
+    //     vars := VarList(Eval(UnList(csl[i][2])));
 
-    //Echo("//Z sortowania topologicznego wychodzi: csl ", csl);
-    //Echo("//Czas: sortowanie topologiczne: ",time8);
-    Echo("//dupa2");
-    ForEach(d, CSE'EmitDefinitions(CSE'GenerateAssignments(csl)))
-            WriteString("    " : d : Nl());
+    //     ForEach (var, vars) [
+    //         j := Association'Get(keys, var);
+    //         //j := Find(keys, var);
+    //         If (j > 0, DestructiveAppend(edges, {j, i}));
+    //     ];
+
+    // ];
+    // Echo("//dupa");
+    // Echo("//Do sortowania topologicznego wchodzi: csl", csl);
+    // Echo("//Do sortowania topologicznego wchodzi: edges ", edges);
+
+    // If (edges != {}, csl := TopologicalSort'Kahn(csl, edges) );
+
+    // //Echo("//Z sortowania topologicznego wychodzi: csl ", csl);
+    // //Echo("//Czas: sortowanie topologiczne: ",time8);
+    // Echo("//dupa2");
+    // ForEach(d, CSE'EmitDefinitions(CSE'GenerateAssignments(csl)))
+    //         WriteString("    " : d : Nl());
     
     A1 := CartesianToSphericalMatrix[l1 + 1];
     A2 := CartesianToSphericalMatrix[l2 + 1];
@@ -104,7 +130,7 @@ EchoSubfunctionBigL(  _l1, _l2, _l3, _l4, _o, _ints , _g, _csl , _r2processed, _
     A4 := CartesianToSphericalMatrix[l4 + 1];
 
     resultWritten := 0;
-    Echo("//dupa3");
+    // Echo("//dupa3");
     For(i' := 0, i' < 2 * l1 + 1, i'++) [
         For(j' := 0, j' < 2 * l2 + 1, j'++) [
             For(k' := 0, k' < 2 * l3 + 1, k'++) [

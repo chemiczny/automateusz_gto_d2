@@ -4,8 +4,9 @@ GenerateGroup( _n1, _n2, _n3, _n4, _groupNo  ) <-- [
 	Local(allElementsNo);
 	allElements := GenerateAllElements(n1, n2, n3, n4);
 	allElementsNo := Length(allElements);
-	Echo("Liczba wszystkich elementow: ":allElementsNo);
-	Echo("Srednia oczekiwana liczebnosc grupy ": N(allElementsNo/groupNo));
+	// Echo(allElements);
+	// Echo("Liczba wszystkich elementow: ":allElementsNo);
+	// Echo("Srednia oczekiwana liczebnosc grupy ": N(allElementsNo/groupNo));
 	groups := {};
 
 	// actElement := { n1, n2, n3, n4};
@@ -18,7 +19,6 @@ GenerateGroup( _n1, _n2, _n3, _n4, _groupNo  ) <-- [
 			elInd := Find(allElements, el);
 			DestructiveDelete(allElements, elInd);
 		];
-
 	];
 
 	// Echo(Length(groups));
@@ -74,6 +74,7 @@ Regroup( _group, _groupNo) <-- [
 
 		DestructiveReplace(group, j, newGroup);
 		DestructiveDelete( group, i);
+		// Echo(group);
 	];
 
 	group;
@@ -121,8 +122,8 @@ CalculateSimilarity( _group1, _group2) <-- [
 	// Echo(group1);
 	// Echo(group2);
 	Local(i);
-	group1Sorted := HeapSort(group1[1], "<");
-	group2Sorted := HeapSort(group2[1], "<");
+	group1Sorted := HeapSort(DeepCopy(group1[1]), "<");
+	group2Sorted := HeapSort(DeepCopy(group2[1]), "<");
 	// Echo(group1Sorted);
 	// Echo(group2Sorted);
 	similarity := 0;
@@ -134,12 +135,12 @@ CalculateSimilarity( _group1, _group2) <-- [
 	similarity;
 ];
 
-groups := GenerateGroup(6,6,6,6, 5);
-
-ForEach( g , groups ) [
-	Echo("kolejna grupa");
-	// Echo(g);
-	Echo(Length(g));
-];
+// groups := GenerateGroup(3,3,1,1, 2);
+// Echo(groups);
+// ForEach( g , groups ) [
+// 	Echo("kolejna grupa");
+// 	// Echo(g);
+// 	Echo(g);
+// ];
 // Echo(GetNeGroupFromElements(3, 3, 2, 3, {3,2,2, 2}));
 // Echo(CalculateSimilarity({1,2,3,4}, {1,2,3,3}));

@@ -197,7 +197,7 @@ class single_d2_ee:
         totalL = shells2int[shells[0]]+shells2int[shells[1]]+shells2int[shells[2]]+shells2int[shells[3]]
         atoms2num = { 'A' : '1', 'B': '2', 'C' : '3', 'D':'4'}
         kernel = ''.join( shells) + '_' + ''.join( atoms )
-        if totalL < 6:
+        if totalL < 6 or True:
             file_name = 'src/d2_ee_'+ kernel + '.ey'
             ey_file = open( file_name, 'w' )
     
@@ -207,7 +207,7 @@ class single_d2_ee:
             ey_file.write('#include <cmath>\n')
             ey_file.write('/*\n')
             ey_file.write('<?\n')
-            ey_file.write('Use("emit_eri_d2_divided.ys");\n')
+            ey_file.write('Use("emit_bigL_eri_d2_divided_iter.ys");\n')
             ey_file.write('?>\n')
             ey_file.write('*/\n')
             ey_file.write('namespace { \n')
