@@ -111,6 +111,7 @@ EmitD2ERIDivided(_l1, _l2, _l3, _l4, _o) <-- [
     d2result := {"d2eexx", "d2eexy", "d2eexz","d2eeyx",  "d2eeyy", "d2eeyz","d2eezx", "d2eezy", "d2eezz"};
     numOfCases:=9;
     
+    time1 := GetTime([
     i := 1;
     ForEach(m1, Shells[l1 + 1]) [
         j := 1;
@@ -165,6 +166,9 @@ EmitD2ERIDivided(_l1, _l2, _l3, _l4, _o) <-- [
         ];
         i := i + 1;
     ];
+
+    ]);
+    Echo("// Czas1: rozwijanie ":String(time1));
     // Echo(csl);
     // origDerivE := DeepCopy(derivE);
     // derivEcsl := {};
@@ -185,21 +189,30 @@ EmitD2ERIDivided(_l1, _l2, _l3, _l4, _o) <-- [
     // Echo("//csl po derivE: ":csl);
     //###################d2r2#############################
 
+    time1 := GetTime([
     { g, csl, d2r2processed, d2r2replaced } := EchoSubfunction("d2r2", l1, l2, l3, l4, o, d2r2, "d2R2e", g, "d2r2", csl);
+    ]);
+    Echo("// Czas2: rozwijanie d2r2 ":String(time1));
     // Echo("//csl po d2r2: ":csl);
     //#######################dr2##############################
 
+    time1 := GetTime([
     { g, csl, dr2processed, dr2replaced } := EchoSubfunction("dr2", l1, l2, l3, l4, o, dr2, "dR2el", g, "dr2", csl);
     // Echo("//csl po dr2: ":csl);
     // ########################r2##############################
- 
+    ]);
+    Echo("// Czas3: rozwijanie dr2 ":String(time1));
+    time1 := GetTime([
     { g, csl, r2processed, r2replaced } := EchoSubfunction("r2", l1, l2, l3, l4, o, r2, "R", g, "r2", csl);
-
+    ]);
+    Echo("// Czas4: rozwijanie r2 ":String(time1));
     //#######################Cart2Herm#######################
     // Echo("//csl po r2: ":csl);
     //Echo("//csl przed g: ":g);
+    time1 := GetTime([
     { g, csl, c2hProcessed, c2hReplaced } := EchoSubfunction("cart2herm", l1, l2, l3, l4, o, ints, "Cart2HermExpCoeff", g, "c2h", csl);
-
+    ]);
+    Echo("// Czas5: rozwijanie c2h ":String(time1));
 
     Echo("// przed zastapieniem ": ints);
     i := 0;
@@ -220,7 +233,10 @@ EmitD2ERIDivided(_l1, _l2, _l3, _l4, _o) <-- [
     Echo("// replaced " : c2hReplaced);
     Echo("// po zastapieniu " : ints);
 
+    time1 := GetTime([
     { g, csl, dEprocessed, dEreplaced } := EchoSubfunction("derivE", l1, l2, l3, l4, o, derivE, "DerivE", "HoldERI", ints ,  g, "dE", csl);
+    ]);
+    Echo("// Czas6: rozwijanie dE ":String(time1));
     // Echo("//csl po c2h: ":csl);
     //Echo("//csl po g: ":g);
     // Echo("//g na koniec : ":g);
@@ -287,9 +303,22 @@ EmitD2ERIDivided(_l1, _l2, _l3, _l4, _o) <-- [
     Echo("    second_derivative_ee_" : CppForm(l1) : CppForm(l2) : CppForm(l3) : CppForm(l4) : "_" : CppForm(o[1]): CppForm(o[2]) : "_derivE(");
     Echo("    ae, xA, yA, zA, be, xB, yB, zB, ce, xC, yC, zC, de, xD, yD, zD, bs, c2h, dE);");
 
+    time1:= GetTime([
+    time2 := GetTime([
     g := CSE'SubstituteTaggedSubexpressions(csl, g);
+    ]);
+    Echo("// podczas: substytuowanie ":String(time2));
+    time2 := GetTime([
     {g, c} := CSE(g);
+    ]);
+    Echo("// podczas: CSE ":String(time2));
+    Echo("// nowe podwyrazenia: ":c);
+    time2 := GetTime([
     csl := Concat(csl, c);
+    ]);
+    Echo("// podczas: konkatenacja ":String(time2));
+    ]);
+    Echo("// Czas7: rozwijanie CSE calosci ":String(time1));
 
     edges := {};
     //keys := Transpose(csl)[1];
@@ -311,7 +340,10 @@ EmitD2ERIDivided(_l1, _l2, _l3, _l4, _o) <-- [
  
     //Echo("//Do sortowania topologicznego wchodzi: csl", csl);
     //Echo("//Do sortowania topologicznego wchodzi: edges ", edges);
+    time1:= GetTime([
     csl := TopologicalSort'Kahn(csl, edges);
+    ]);
+    Echo("// Czas8: sortowanie topologiczne ":String(time1));
 
     //Echo("//Z sortowania topologicznego wychodzi: csl ", csl);
     //Echo("//Czas: sortowanie topologiczne: ",time8);
@@ -383,10 +415,14 @@ EmitD2ERIDivided(_l1, _l2, _l3, _l4, _o) <-- [
     Echo("}");
 ];
 
-// ToFile("test.cpp") [
-//    Echo("#include<cmath>");
-//    Echo("double Pi = 3.0;");
-//    EmitD2ERIDivided( 2, 1, 0, 0, {1, 1});
+ToFile("test.cpp") [
+   Echo("#include<cmath>");
+   Echo("double Pi = 3.0;");
+   timeAll := GetTime([
+   EmitD2ERIDivided( 0, 0, 0, 0, {1, 1});
+   ]);
 
-//    Echo("int main() {} ;");
-// ];
+   Echo("// Czas all: ":String(timeAll));
+
+   Echo("int main() {} ;");
+];

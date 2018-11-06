@@ -1,0 +1,295 @@
+Use("hessian_two_electrons_coulomb.ys");
+Use("cse.ys");
+Use("cpp_form.ys");
+Use("shells.ys");
+Use("emit_eri_utilities.ys");
+Use("emit_eri_divided_utilities.ys");
+Use("echoSubFunctionBigLDivided.ys");
+Use("cartesian_to_spherical.ys");
+Use("generateGgroups.ys")
+
+MaxEvalDepth(100000);
+    
+10 # DeepCopy(l_IsList) <-- [
+    Local(r);
+    r := {};
+    ForEach(e, l)
+        DestructiveAppend(r, DeepCopy(e));
+    r;
+];
+
+20 # DeepCopy(_e) <-- e;
+
+UnProtect( FillList );
+Retract(FillList, 2);
+
+10 # FillList(_item, 0) <-- {};
+
+20 # FillList(_item, length_IsPositiveInteger) <-- [
+    Local(i, result);
+    result := {};
+    For(i:=0, i < length, i++)
+        DestructiveInsert(result, 1, DeepCopy(item));
+    result;
+];
+
+Listify(a_IsAtom) <-- a;
+UnList(a_IsAtom) <-- a;
+
+TopologicalSort'Kahn(V_IsList, E_IsList) <-- [
+    Local(n, A, I, S, L, e, v, i, av, R);
+
+    n := Length(V);
+
+    // initialize adjacency list
+    A := FillList({}, n);
+    ForEach (e, E)
+        DestructiveAppend(A[e[1]], e[2]);
+
+    // initialize in-degree list
+    I := FillList(0, n);
+    ForEach (e, Transpose(E)[2])
+        I[e] := I[e] + 1;
+
+    // find nodes with no incoming edges
+    S := {};
+    ForEach (i, 1 .. n)
+        If (I[i] = 0, DestructiveAppend(S, i));
+
+    // sort
+    L := {};
+    While (Length(S) != 0) [
+        v := Head(S);
+        S := Tail(S);
+        DestructiveAppend(L, v);
+        ForEach (av, A[v]) [
+            I[av] := I[av] - 1;
+            If (I[av] = 0, DestructiveAppend(S, av));
+        ];
+    ];
+
+    Check(Length(L) = Length(V), "topological sort: cycle detected");
+
+    // translate the result
+    For (i := 1, i <= n, i++)
+        DestructiveReplace(L, i, V[L[i]]);
+
+    L;
+];
+
+EmitD2ERIDivided(_l1, _l2, _l3, _l4, _o) <-- [
+   //If (l1 + l2 + l3 + l4 > 5, [
+        Echo("#pragma GCC optimize (\"O0\")");
+        //Echo("#pragma GCC optimize (\"no-expensive-optimizations\")");
+        //Echo("#pragma GCC optimize (\"no-unit-at-a-time\")");
+    //]);
+
+    nc1 := (l1 + 1) * (l1 + 2) / 2;
+    nc2 := (l2 + 1) * (l2 + 2) / 2;
+    nc3 := (l3 + 1) * (l3 + 2) / 2;
+    nc4 := (l4 + 1) * (l4 + 2) / 2;
+
+    ns1 := 2 * l1 + 1;
+    ns2 := 2 * l2 + 1;
+    ns3 := 2 * l3 + 1;
+    ns4 := 2 * l4 + 1;
+
+    Local(i,j,k,l, csl, ints, derivE, d2r2, dr2, r2, h, g, extract);
+
+    // postfixes := {"x", "y", "z"};
+
+    g := FillList(FillList(FillList(FillList(FlatCopy(FillList(0, nc4)), nc3), nc2), nc1 ), 9);
+    // // //gs := FillList(FillList(FillList(FillList(FlatCopy(FillList(0, 9)), ns4), ns3), ns2), ns1);
+
+    csl := FillList(FlatCopy({}), 9);
+    ints := {};
+    derivE := FillList(FlatCopy({}), 9);
+    d2r2 := FillList(FlatCopy({}), 9);
+    dr2 := FillList(FlatCopy({}), 9);
+    r2 := {};
+    h := {};
+
+    components := { {1,1}, {1,2}, {1,3}, {2, 1}, {2,2}, {2,3}, {3, 1}, {3,2}, {3,3} };
+    d2result := {"d2eexx", "d2eexy", "d2eexz","d2eeyx",  "d2eeyy", "d2eeyz","d2eezx", "d2eezy", "d2eezz"};
+    numOfCases:=9;
+    
+    time1 := GetTime([
+    i := 1;
+    ForEach(m1, Shells[l1 + 1]) [
+        j := 1;
+        ForEach(m2, Shells[l2 + 1]) [
+            k := 1;
+            ForEach(m3, Shells[l3 + 1]) [
+                l := 1;
+                ForEach(m4, Shells[l4 + 1]) [
+                    caseIt := 1;
+                    ForEach( caseInd , components) [
+                        
+                        args := {"HoldERI", "holdDerivE", "holdD2R2e", "holdDR2el", "holdR",  m1, ae, m2, be, {xA, yA, zA}, {xB, yB, zB},m3, ce, 
+                             m4, de, {xC, yC, zC}, {xD, yD, zD}, p, q, bs, {xP, yP, zP}, {xQ, yQ, zQ},
+                             caseInd, o};
+
+                        h := (hessian'coulomb'twoelectrons'part@ args);
+                        //wywolanie funkcji liczacej pochodne
+                        
+                        
+                        //znajduje wspolczynniki cart2herm, ktore juz sie pojawily
+                        
+                        h := CSE'SubstituteTaggedSubexpressions(ints, h); 
+                        h := CSE'SubstituteTaggedSubexpressions(derivE[caseIt], h);
+                        h := CSE'SubstituteTaggedSubexpressions(d2r2[caseIt], h);
+                        h := CSE'SubstituteTaggedSubexpressions(dr2[caseIt], h);
+                        h := CSE'SubstituteTaggedSubexpressions(r2, h);
+
+                        // Echo("//h po zastepowaniu ": h);
+                        
+                        {extract, h} := CSE'ExtractMulti(h, {"HoldERI", "holdDerivE",  "holdR",  "holdDR2el", "holdD2R2e" } ); 
+
+                        ints := Concat(ints, extract[1]);
+                        derivE[caseIt] := Concat( derivE[caseIt], extract[2] );
+                        d2r2[caseIt] := Concat( d2r2[caseIt], extract[5] );
+                        dr2[caseIt] := Concat( dr2[caseIt], extract[4] );
+                        r2 := Concat( r2, extract[3] );
+                        
+                        
+
+                        //znajduje wyrazenia proste, ktore juz sie pojawily
+                        h := CSE'SubstituteTaggedSubexpressions(csl[caseIt], h);
+              
+                        {h, t} := CSE(h);
+
+                        csl[caseIt] := Concat(csl[caseIt], t);
+
+                        g[caseIt][i][j][k][l]:= h;
+
+                        // Echo("//h na koniec ": h);
+                        caseIt := caseIt + 1;
+                        
+                    ];
+                    l := l + 1;
+                ];
+                k := k + 1;
+            ];
+            j := j + 1;
+        ];
+        i := i + 1;
+    ];
+
+    ]);
+    // Echo("kurwa");
+    // Echo("//r2 ":r2);
+    // Echo("//csl po derivE: ":csl);
+    // ########################r2##############################
+    // ]);
+    // Echo("// Czas3: rozwijanie dr2 ":String(time1));
+    // time1 := GetTime([
+    { g, csl, r2processed, r2replaced } := EchoSubfunction("r2", l1, l2, l3, l4, o, r2, "R", g, "r2", csl);
+    // ]);
+    // Echo("// Czas4: rozwijanie r2 ":String(time1));
+
+    //#######################Cart2Herm#######################
+    // Echo("//csl po r2: ":csl);
+    // Echo("//csl przed g: ":g);
+    // Echo("//instsy: ":ints);
+    // time1 := GetTime([
+    { g, csl, c2hProcessed, c2hReplaced } := EchoSubfunction("cart2herm", l1, l2, l3, l4, o, ints, "Cart2HermExpCoeff", g, "c2h", csl);
+    // ]);
+    // Echo("// Czas5: rozwijanie c2h ":String(time1));
+
+    Echo("// przed zastapieniem ": ints);
+    i := 0;
+    ForEach(  cp , c2hProcessed  ) [
+        ints := Subst( cp[1], Atom("s[" : CppForm(i ) : "]") ) ints;
+        i := i+1;
+    ];
+
+    ForEach(  cp , c2hReplaced  ) [
+        ForEach( c , cp[2] ) [
+            ints := Subst( c, Atom("s[" : CppForm(i) : "]") ) ints;
+        ];
+        i := i+1;
+    ];
+
+    // Echo("tolololo"):
+    // Echo("// processs " : c2hProcessed);
+    // Echo("// replaced " : c2hReplaced);
+    // Echo("// po zastapieniu " : ints);
+    // Echo("//co do kurwy: ":d2r2);
+
+    //###################d2r2#############################
+
+    lGroups := GenerateGroup( nc1, nc2, nc3, nc4 , l1 + l2 + l3 + l4 -1 );
+
+    For( caseIt := 1 , caseIt <= 9 , caseIt := caseIt+1 ) [
+        
+        EchoSubfunctionBigLDivided(  l1, l2, l3, l4, o, lGroups, ints , g[caseIt], csl[caseIt] , r2processed, r2replaced, c2hProcessed, c2hReplaced, d2r2[caseIt], dr2[caseIt], derivE[caseIt], d2result[caseIt] );
+
+    ];
+
+    Echo("void second_derivative_ee_" : CppForm(l1) : CppForm(l2) : CppForm(l3) : CppForm(l4) : "_" : CppForm(o[1]): CppForm(o[2]) : "(");
+    Echo("    const double ae,");
+    Echo("    const double xA,");
+    Echo("    const double yA,");
+    Echo("    const double zA,");
+    Echo("    const double be,");
+    Echo("    const double xB,");
+    Echo("    const double yB,");
+    Echo("    const double zB,");
+    Echo("    const double ce,");
+    Echo("    const double xC,");
+    Echo("    const double yC,");
+    Echo("    const double zC,");
+    Echo("    const double de,");
+    Echo("    const double xD,");
+    Echo("    const double yD,");
+    Echo("    const double zD,");
+    Echo("    const double* const bs,");
+    Echo("    double* const d2eexx,");
+    Echo("    double* const d2eexy,");
+    Echo("    double* const d2eexz,");
+    Echo("    double* const d2eeyx,");
+    Echo("    double* const d2eeyy,");
+    Echo("    double* const d2eeyz,");
+    Echo("    double* const d2eezx,");
+    Echo("    double* const d2eezy,");
+    Echo("    double* const d2eezz)");
+    Echo("{");
+
+    Echo("    const double p = ae + be;");
+    Echo("    const double q = ce + de;");
+
+    Echo("    const double xP = (ae * xA + be * xB) / p;");
+    Echo("    const double yP = (ae * yA + be * yB) / p;");
+    Echo("    const double zP = (ae * zA + be * zB) / p;");
+
+    Echo("    const double xQ = (ce * xC + de * xD) / q;");
+    Echo("    const double yQ = (ce * yC + de * yD) / q;");
+    Echo("    const double zQ = (ce * zC + de * zD) / q;");
+
+
+    Echo("    double r2[": String(Length(r2processed) + Length(r2replaced)): "];");
+    Echo("    double c2h[": String(Length(c2hProcessed) + Length(c2hReplaced)): "];");
+
+    Echo("    second_derivative_ee_" : CppForm(l1) : CppForm(l2) : CppForm(l3) : CppForm(l4) : "_" : CppForm(o[1]): CppForm(o[2]) : "_r2(");
+    Echo("    ae, xA, yA, zA, be, xB, yB, zB, ce, xC, yC, zC, de, xD, yD, zD, bs, r2);");
+
+    Echo("    second_derivative_ee_" : CppForm(l1) : CppForm(l2) : CppForm(l3) : CppForm(l4) : "_" : CppForm(o[1]): CppForm(o[2]) : "_cart2herm(");
+    Echo("    ae, xA, yA, zA, be, xB, yB, zB, ce, xC, yC, zC, de, xD, yD, zD, bs, c2h);");
+
+    For( caseIt := 1 , caseIt <= 9 , caseIt := caseIt+1 ) [
+        
+        Echo("     second_derivative_ee_" : CppForm(l1) : CppForm(l2) : CppForm(l3) : CppForm(l4) : "_" : CppForm(o[1]): CppForm(o[2]) : "_" : d2result[caseIt]: "(");
+        Echo("    ae, xA, yA, zA, be, xB, yB, zB, ce, xC, yC, zC, de, xD, yD, zD, bs, ":d2result[caseIt]:");");
+
+    ];
+
+
+    Echo("}");
+];
+
+ToFile("expansions.cpp") [
+   // timeAll := GetTime([
+   EmitD2ERIDivided( 1, 1, 1, 1, {1, 1});
+   // ]);
+
+];

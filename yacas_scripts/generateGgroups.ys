@@ -1,0 +1,145 @@
+
+
+GenerateGroup( _n1, _n2, _n3, _n4, _groupNo  ) <-- [
+	Local(allElementsNo);
+	allElements := GenerateAllElements(n1, n2, n3, n4);
+	allElementsNo := Length(allElements);
+	Echo("Liczba wszystkich elementow: ":allElementsNo);
+	Echo("Srednia oczekiwana liczebnosc grupy ": N(allElementsNo/groupNo));
+	groups := {};
+
+	// actElement := { n1, n2, n3, n4};
+
+	While( Length(allElements) > 0 ) [
+		actElement := Head(allElements);
+		newGroup := GetNeGroupFromElements(n1, n2, n3, n4, actElement);
+		DestructiveAppend(groups, newGroup );
+		ForEach(  el , newGroup ) [
+			elInd := Find(allElements, el);
+			DestructiveDelete(allElements, elInd);
+		];
+
+	];
+
+	// Echo(Length(groups));
+
+	groups := Regroup(groups, groupNo );
+	groups;
+];
+
+GetNeGroupFromElements( _n1, _n2, _n3, _n4, _element) <-- [
+	newGroup := RemoveDuplicates(Permutations(element));
+
+	i := 1;
+
+	While( i <= Length(newGroup) ) [
+		element2test := newGroup[i];
+
+		If( element2test[1] > n1 Or element2test[2] > n2 Or element2test[3] > n3 Or element2test[4] > n4 , 
+			DestructiveDelete(newGroup, i),
+			i := i+1
+        	
+		  );
+
+	];
+
+	newGroup;
+];
+
+GenerateAllElements(_n1, _n2, _n3, _n4) <-- [
+	Local(group);
+	group := {};
+
+	For( i:=1 , i<= n1 , i := i+1  ) [
+		For( j:= 1, j <= n2 , j := j+1  ) [
+			For( k:=1 , k <= n3 , k := k+1  ) [
+				For( l := 1 , l <= n4 , l := l+1  ) [
+					DestructiveAppend(group, { i, j, k, l});
+				];
+			];
+		];
+	];
+	group;
+];
+
+Regroup( _group, _groupNo) <-- [
+	While( Length(group) > groupNo ) [
+	// Echo(group);
+		i := FindShortestGroup(group);
+		group2remove := group[i];
+		j := FindClosestGroup(group, i);
+		newGroup := group[j];
+
+		newGroup := Concat(newGroup, group2remove);
+
+		DestructiveReplace(group, j, newGroup);
+		DestructiveDelete( group, i);
+	];
+
+	group;
+];
+
+FindShortestGroup( _group ) <-- [
+	Local(i);
+	minLen := 666;
+	minInd := -1;
+
+	i := 1;
+	ForEach( g , group ) [
+	// Echo(g);
+		If( Length(g) < minLen ,
+		[
+			minLen := Length(g);
+			minInd := i; 
+		]
+		);
+		i := i+1;
+	];
+
+	minInd;
+];
+
+FindClosestGroup( _groups, _ind ) <-- [
+	Local(i);
+	indexes2check := {};
+	// Echo("lol");
+	If( ind > 1 , DestructiveAppend(indexes2check, ind-1)  );
+	If( ind < Length(groups) , DestructiveAppend(indexes2check, ind+1)  );
+	// Echo("lol2");
+	maxSimilarity := -1;
+	closestInd := -1;
+	ForEach( i , indexes2check ) [
+		// Echo("lol3");
+		similarity := CalculateSimilarity(groups[ind], groups[i]);
+		// Echo(similarity);
+		If( similarity > maxSimilarity , closestInd := i  );
+	];
+	closestInd;
+];
+
+CalculateSimilarity( _group1, _group2) <-- [
+	// Echo(group1);
+	// Echo(group2);
+	Local(i);
+	group1Sorted := HeapSort(group1[1], "<");
+	group2Sorted := HeapSort(group2[1], "<");
+	// Echo(group1Sorted);
+	// Echo(group2Sorted);
+	similarity := 0;
+	For( i := 1 , i <= 4 , i := i+1  ) [
+		If( group1Sorted[i] = group2Sorted[i] , similarity := similarity+1  );
+		// Echo("lol");
+	];
+
+	similarity;
+];
+
+groups := GenerateGroup(6,6,6,6, 5);
+
+ForEach( g , groups ) [
+	Echo("kolejna grupa");
+	// Echo(g);
+	Echo(Length(g));
+];
+// Echo(GetNeGroupFromElements(3, 3, 2, 3, {3,2,2, 2}));
+// Echo(CalculateSimilarity({1,2,3,4}, {1,2,3,3}));

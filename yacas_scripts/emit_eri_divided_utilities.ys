@@ -1,13 +1,29 @@
+
+//inline
 EchoSubfunction( _subname, _l1, _l2, _l3, _l4, _o, _expressions, _expr2eval, _g, _subArray, _mainCsl ) <-- [
 	Local(csl, edges, keys, newExpr);
 	
 
     csl := {};
-    // Echo("//wyrazenia":expressions);
-    { expressions, csl} := EvalSubexpression( DeepCopy(expressions), expr2eval, csl  );
-    // Echo("//znowu wyrazenia ": expressions);
+    Echo("//wyrazenia":expressions);
+    time3 := GetTime([
+    exprCopy := DeepCopy(expressions);
+    { expressions, csl} := EvalSubexpression( exprCopy, expr2eval, csl  );
+    ]);
+    Echo("// podczas: ewaluacja wyrazen ":String(time3));
+    Echo("//znowu wyrazenia ": expressions);
+
+    time3 := GetTime([
     { csl, g, expressions, newExpr, mainCsl } := MoveAtoms2Csl2(expressions, csl, g, mainCsl);
+    ]);
+    Echo("// podczas: atomizacja ":String(time3));
+
+    time3 := GetTime([
     origExpressions := DeepCopy(expressions);
+    ]);
+    Echo("// podczas: deep copy ":String(time3));
+
+    time3 := GetTime([
     For (i := 1, i <= Length(origExpressions), i++) [
         // Echo("    g[" : CppForm(i - 1) : "] = " : String(origExpressions[i][1]) : ";");
         g := Subst(origExpressions[i][1], Atom(subArray:"[" : CppForm(i - 1) : "]")) g;
@@ -26,6 +42,10 @@ EchoSubfunction( _subname, _l1, _l2, _l3, _l4, _o, _expressions, _expr2eval, _g,
         i := i + 1;
     ];
 
+    ]);
+    Echo("// podczas: zastepowanie ":String(time3));
+
+    time3 := GetTime([
 	Echo(" ");
     Echo("void second_derivative_ee_" : CppForm(l1) : CppForm(l2) : CppForm(l3) : CppForm(l4) : "_" : CppForm(o[1]): CppForm(o[2]) : "_": subname :"(");
     Echo("    const double ae,");
@@ -103,6 +123,9 @@ EchoSubfunction( _subname, _l1, _l2, _l3, _l4, _o, _expressions, _expr2eval, _g,
 
 
     Echo("};");
+
+    ]);
+    Echo("// podczas: cala reszta ":String(time3));
     { g, mainCsl, origExpressions, newExpr };
 ];
 
@@ -111,22 +134,35 @@ expr2arrayType( _expr, _arrayName) <-- [
 		expr[i][1] := Atom(arrayName : "[" : CppForm(i - 1) : "]") ;
 ];
 
-EchoSubfunction( _subname, _l1, _l2, _l3, _l4, _o, _expressions, _expr2eval, _subexpr2hold, _origSubs , _g, _subArray, _mainCsl ) <-- [
+//inline
+EchoSubfunction( _subname, _l1, _l2, _l3, _l4, _o, _expressions, _expr2eval, _subexpr2hold, _origSubs1 , _g, _subArray, _mainCsl ) <-- [
 	Local(csl, edges, keys, newExpr);
 
     csl := {};
     // Echo("//kurla");
     // // Echo("//": subexpr2hold);
     // Echo("// przed evalem": expressions);
+    origSubs := DeepCopy(origSubs1);
+    time3 := GetTime([
     { expressions, origSubs ,csl} := EvalSubexpression( expressions, expr2eval, subexpr2hold , origSubs ,  csl  );
+    ]);
+    Echo("// podczas: ewaluacja ":String(time3));
     // // Echo("//kurla mac");
     // Echo("// po evalu": expressions);
 
+    time3 := GetTime([
     { csl, g, expressions, newExpr, mainCsl } := MoveAtoms2Csl2(expressions, csl, g, mainCsl);
+    ]);
+    Echo("// podczas: atomizacja ":String(time3));
 
     // Echo("//Po movie ": expressions);
 
+    time3 := GetTime([
 	origExpressions := DeepCopy(expressions);
+    ]);
+    Echo("// podczas: deep copy ":String(time3));
+
+    time3 := GetTime([
     For (i := 1, i <= Length(origExpressions), i++) [
     	// Echo("//g teraz : ":g);
         // Echo("    g[" : CppForm(i - 1) : "] = " : String(origExpressions[i][1]) : ";");
@@ -147,7 +183,10 @@ EchoSubfunction( _subname, _l1, _l2, _l3, _l4, _o, _expressions, _expr2eval, _su
         
         i := i + 1;
     ];
+    ]);
+    Echo("// podczas: zamiana ":String(time3));
 
+    time3 := GetTime([
 	Echo(" ");
     Echo("void second_derivative_ee_" : CppForm(l1) : CppForm(l2) : CppForm(l3) : CppForm(l4) : "_" : CppForm(o[1]): CppForm(o[2]) : "_": subname :"(");
     Echo("    const double ae,");
@@ -228,5 +267,7 @@ EchoSubfunction( _subname, _l1, _l2, _l3, _l4, _o, _expressions, _expr2eval, _su
     ];
 
     Echo("};");
-    { g, mainCsl, origExpressions, newExpr };
+    ]);
+    Echo("// podczas: cala reszta ":String(time3));
+    {g,  mainCsl, origExpressions, newExpr };
 ];
