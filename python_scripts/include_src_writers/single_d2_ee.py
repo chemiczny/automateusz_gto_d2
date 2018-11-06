@@ -197,7 +197,52 @@ class single_d2_ee:
         totalL = shells2int[shells[0]]+shells2int[shells[1]]+shells2int[shells[2]]+shells2int[shells[3]]
         atoms2num = { 'A' : '1', 'B': '2', 'C' : '3', 'D':'4'}
         kernel = ''.join( shells) + '_' + ''.join( atoms )
-        if totalL < 6 or True:
+        if totalL < 4 :
+            file_name = 'src/d2_ee_'+ kernel + '.ey'
+            ey_file = open( file_name, 'w' )
+    
+            include_name = 'gto_d2_kit/d2_ee_' + kernel + '.hpp'
+    
+            ey_file.write( '#include "'+ include_name + '"\n')
+            ey_file.write('#include <cmath>\n')
+            ey_file.write('/*\n')
+            ey_file.write('<?\n')
+            ey_file.write('Use("emit_eri_d2.ys");\n')
+            ey_file.write('?>\n')
+            ey_file.write('*/\n')
+            ey_file.write('namespace { \n')
+            ey_file.write('    const double Pi = M_PI;\n')
+            ey_file.write('}\n')
+            ey_file.write('//<?\n')
+            ey_file.write('EmitD2ERI( '+shells2num[ shells[0] ] +' , '+shells2num[ shells[1] ] +' , '
+                + shells2num[ shells[2] ] +' , '+shells2num[ shells[3] ] +' , {' + atoms2num[ atoms[0] ]+ ' , '+
+                atoms2num[ atoms[1] ] +' } ); \n')
+            ey_file.write('//?>\n')
+            ey_file.close()
+        elif totalL < 6:
+            file_name = 'src/d2_ee_'+ kernel + '.ey'
+            ey_file = open( file_name, 'w' )
+    
+            include_name = 'gto_d2_kit/d2_ee_' + kernel + '.hpp'
+    
+            ey_file.write( '#include "'+ include_name + '"\n')
+            ey_file.write('#include <cmath>\n')
+            ey_file.write('/*\n')
+            ey_file.write('<?\n')
+            ey_file.write('Use("emit_bigL_eri_d2_divided.ys");\n')
+            ey_file.write('?>\n')
+            ey_file.write('*/\n')
+            ey_file.write('namespace { \n')
+            ey_file.write('    const double Pi = M_PI;\n')
+            ey_file.write('}\n')
+            ey_file.write('//<?\n')
+            ey_file.write('EmitD2ERIDivided( '+shells2num[ shells[0] ] +' , '+shells2num[ shells[1] ] +' , '
+                + shells2num[ shells[2] ] +' , '+shells2num[ shells[3] ] +' , {' + atoms2num[ atoms[0] ]+ ' , '+
+                atoms2num[ atoms[1] ] +' } ); \n')
+            ey_file.write('//?>\n')
+            ey_file.close()
+
+        else:
             file_name = 'src/d2_ee_'+ kernel + '.ey'
             ey_file = open( file_name, 'w' )
     
@@ -219,133 +264,133 @@ class single_d2_ee:
                 atoms2num[ atoms[1] ] +' } ); \n')
             ey_file.write('//?>\n')
             ey_file.close()
-        else:
-            file_name = 'src/d2_ee_'+ kernel + '.cpp'
-            ey_file = open( file_name, 'w' )
+
+            # file_name = 'src/d2_ee_'+ kernel + '.cpp'
+            # ey_file = open( file_name, 'w' )
     
            
-            atoms2num = { 'A' : '1', 'B': '2', 'C' : '3', 'D':'4'}
+            # atoms2num = { 'A' : '1', 'B': '2', 'C' : '3', 'D':'4'}
     
-            include_name = 'gto_d2_kit/d2_ee_' + kernel + '.hpp'
+            # include_name = 'gto_d2_kit/d2_ee_' + kernel + '.hpp'
     
-            ey_file.write( '#include "'+ include_name + '"\n')
-            ey_file.write( '#include "gto_d2_kit/d2_ee_' + kernel + '_xx.hpp"\n')
-            ey_file.write( '#include "gto_d2_kit/d2_ee_' + kernel + '_xy.hpp"\n')
-            ey_file.write( '#include "gto_d2_kit/d2_ee_' + kernel + '_xz.hpp"\n')
+            # ey_file.write( '#include "'+ include_name + '"\n')
+            # ey_file.write( '#include "gto_d2_kit/d2_ee_' + kernel + '_xx.hpp"\n')
+            # ey_file.write( '#include "gto_d2_kit/d2_ee_' + kernel + '_xy.hpp"\n')
+            # ey_file.write( '#include "gto_d2_kit/d2_ee_' + kernel + '_xz.hpp"\n')
             
-            ey_file.write( '#include "gto_d2_kit/d2_ee_' + kernel + '_yx.hpp"\n')
-            ey_file.write( '#include "gto_d2_kit/d2_ee_' + kernel + '_yy.hpp"\n')
-            ey_file.write( '#include "gto_d2_kit/d2_ee_' + kernel + '_yz.hpp"\n')
+            # ey_file.write( '#include "gto_d2_kit/d2_ee_' + kernel + '_yx.hpp"\n')
+            # ey_file.write( '#include "gto_d2_kit/d2_ee_' + kernel + '_yy.hpp"\n')
+            # ey_file.write( '#include "gto_d2_kit/d2_ee_' + kernel + '_yz.hpp"\n')
             
-            ey_file.write( '#include "gto_d2_kit/d2_ee_' + kernel + '_zx.hpp"\n')
-            ey_file.write( '#include "gto_d2_kit/d2_ee_' + kernel + '_zy.hpp"\n')
-            ey_file.write( '#include "gto_d2_kit/d2_ee_' + kernel + '_zz.hpp"\n')
+            # ey_file.write( '#include "gto_d2_kit/d2_ee_' + kernel + '_zx.hpp"\n')
+            # ey_file.write( '#include "gto_d2_kit/d2_ee_' + kernel + '_zy.hpp"\n')
+            # ey_file.write( '#include "gto_d2_kit/d2_ee_' + kernel + '_zz.hpp"\n')
             
-            nameKernel = shells2num[ self.shells[0] ] +shells2num[ self.shells[1] ] + shells2num[ self.shells[2] ] +shells2num[ self.shells[3] ] +'_' + atoms2num[ self.atoms[0] ] + atoms2num[ self.atoms[1] ]
-            ey_file.write('void second_derivative_ee_'+ nameKernel +'( \n')
+            # nameKernel = shells2num[ self.shells[0] ] +shells2num[ self.shells[1] ] + shells2num[ self.shells[2] ] +shells2num[ self.shells[3] ] +'_' + atoms2num[ self.atoms[0] ] + atoms2num[ self.atoms[1] ]
+            # ey_file.write('void second_derivative_ee_'+ nameKernel +'( \n')
 
-            ey_file.write('     const double ae,             \n')
-            ey_file.write('     const double xA,	     \n')
-            ey_file.write('     const double yA,             \n')
-            ey_file.write('     const double zA,	     \n')
-            ey_file.write('     const double be,             \n')
-            ey_file.write('     const double xB,	     \n')
-            ey_file.write('     const double yB,             \n')
-            ey_file.write('     const double zB,	     \n')
-            ey_file.write('     const double ce,             \n')
-            ey_file.write('     const double xC,	     \n')
-            ey_file.write('     const double yC,             \n')
-            ey_file.write('     const double zC,	     \n')
-            ey_file.write('     const double de,             \n')
-            ey_file.write('     const double xD,	     \n')
-            ey_file.write('     const double yD,             \n')
-            ey_file.write('     const double zD,	     \n')
-            ey_file.write('     const double* const bs, 	    \n')
-            ey_file.write('     double* const d2eexx,   	    \n')
-            ey_file.write('     double* const d2eexy,   	    \n')
-            ey_file.write('     double* const d2eexz,   	    \n')
-            ey_file.write('     double* const d2eeyx,		  \n')
-            ey_file.write('     double* const d2eeyy,		  \n')
-            ey_file.write('     double* const d2eeyz,		  \n')
-            ey_file.write('     double* const d2eezx,		  \n')
-            ey_file.write('     double* const d2eezy,		  \n')
-            ey_file.write('     double* const d2eezz)		  \n')
-            ey_file.write(' { 		  \n')
+            # ey_file.write('     const double ae,             \n')
+            # ey_file.write('     const double xA,	     \n')
+            # ey_file.write('     const double yA,             \n')
+            # ey_file.write('     const double zA,	     \n')
+            # ey_file.write('     const double be,             \n')
+            # ey_file.write('     const double xB,	     \n')
+            # ey_file.write('     const double yB,             \n')
+            # ey_file.write('     const double zB,	     \n')
+            # ey_file.write('     const double ce,             \n')
+            # ey_file.write('     const double xC,	     \n')
+            # ey_file.write('     const double yC,             \n')
+            # ey_file.write('     const double zC,	     \n')
+            # ey_file.write('     const double de,             \n')
+            # ey_file.write('     const double xD,	     \n')
+            # ey_file.write('     const double yD,             \n')
+            # ey_file.write('     const double zD,	     \n')
+            # ey_file.write('     const double* const bs, 	    \n')
+            # ey_file.write('     double* const d2eexx,   	    \n')
+            # ey_file.write('     double* const d2eexy,   	    \n')
+            # ey_file.write('     double* const d2eexz,   	    \n')
+            # ey_file.write('     double* const d2eeyx,		  \n')
+            # ey_file.write('     double* const d2eeyy,		  \n')
+            # ey_file.write('     double* const d2eeyz,		  \n')
+            # ey_file.write('     double* const d2eezx,		  \n')
+            # ey_file.write('     double* const d2eezy,		  \n')
+            # ey_file.write('     double* const d2eezz)		  \n')
+            # ey_file.write(' { 		  \n')
             
-            ey_file.write('   second_derivative_ee_'+ nameKernel +'_11( ae, xA, yA, zA, be, xB, yB, zB, ' +
-            'ce, xC, yC, zC, de, xD, yD, zD, bs, d2eexx );\n')     
-            ey_file.write('   second_derivative_ee_'+ nameKernel +'_12( ae, xA, yA, zA, be, xB, yB, zB, ' +
-            'ce, xC, yC, zC, de, xD, yD, zD, bs, d2eexy );\n') 
-            ey_file.write('   second_derivative_ee_'+ nameKernel +'_13( ae, xA, yA, zA, be, xB, yB, zB, ' +
-            'ce, xC, yC, zC, de, xD, yD, zD, bs, d2eexz );\n') 
+            # ey_file.write('   second_derivative_ee_'+ nameKernel +'_11( ae, xA, yA, zA, be, xB, yB, zB, ' +
+            # 'ce, xC, yC, zC, de, xD, yD, zD, bs, d2eexx );\n')     
+            # ey_file.write('   second_derivative_ee_'+ nameKernel +'_12( ae, xA, yA, zA, be, xB, yB, zB, ' +
+            # 'ce, xC, yC, zC, de, xD, yD, zD, bs, d2eexy );\n') 
+            # ey_file.write('   second_derivative_ee_'+ nameKernel +'_13( ae, xA, yA, zA, be, xB, yB, zB, ' +
+            # 'ce, xC, yC, zC, de, xD, yD, zD, bs, d2eexz );\n') 
             
-            ey_file.write('   second_derivative_ee_'+ nameKernel +'_21( ae, xA, yA, zA, be, xB, yB, zB, ' +
-            'ce, xC, yC, zC, de, xD, yD, zD, bs, d2eeyx );\n') 
-            ey_file.write('   second_derivative_ee_'+ nameKernel +'_22( ae, xA, yA, zA, be, xB, yB, zB, ' +
-            'ce, xC, yC, zC, de, xD, yD, zD, bs, d2eeyy );\n') 
-            ey_file.write('   second_derivative_ee_'+ nameKernel +'_23( ae, xA, yA, zA, be, xB, yB, zB, ' +
-            'ce, xC, yC, zC, de, xD, yD, zD, bs, d2eeyz );\n') 
+            # ey_file.write('   second_derivative_ee_'+ nameKernel +'_21( ae, xA, yA, zA, be, xB, yB, zB, ' +
+            # 'ce, xC, yC, zC, de, xD, yD, zD, bs, d2eeyx );\n') 
+            # ey_file.write('   second_derivative_ee_'+ nameKernel +'_22( ae, xA, yA, zA, be, xB, yB, zB, ' +
+            # 'ce, xC, yC, zC, de, xD, yD, zD, bs, d2eeyy );\n') 
+            # ey_file.write('   second_derivative_ee_'+ nameKernel +'_23( ae, xA, yA, zA, be, xB, yB, zB, ' +
+            # 'ce, xC, yC, zC, de, xD, yD, zD, bs, d2eeyz );\n') 
             
-            ey_file.write('   second_derivative_ee_'+ nameKernel +'_31( ae, xA, yA, zA, be, xB, yB, zB, ' +
-            'ce, xC, yC, zC, de, xD, yD, zD, bs, d2eezx );\n') 
-            ey_file.write('   second_derivative_ee_'+ nameKernel +'_32( ae, xA, yA, zA, be, xB, yB, zB, ' +
-            'ce, xC, yC, zC, de, xD, yD, zD, bs, d2eezy );\n') 
-            ey_file.write('   second_derivative_ee_'+ nameKernel +'_33( ae, xA, yA, zA, be, xB, yB, zB, ' +
-            'ce, xC, yC, zC, de, xD, yD, zD, bs, d2eezz );\n') 
+            # ey_file.write('   second_derivative_ee_'+ nameKernel +'_31( ae, xA, yA, zA, be, xB, yB, zB, ' +
+            # 'ce, xC, yC, zC, de, xD, yD, zD, bs, d2eezx );\n') 
+            # ey_file.write('   second_derivative_ee_'+ nameKernel +'_32( ae, xA, yA, zA, be, xB, yB, zB, ' +
+            # 'ce, xC, yC, zC, de, xD, yD, zD, bs, d2eezy );\n') 
+            # ey_file.write('   second_derivative_ee_'+ nameKernel +'_33( ae, xA, yA, zA, be, xB, yB, zB, ' +
+            # 'ce, xC, yC, zC, de, xD, yD, zD, bs, d2eezz );\n') 
             
-            ey_file.write(' }\n')
-            ey_file.close()
+            # ey_file.write(' }\n')
+            # ey_file.close()
             
-            coord2case = { "x" : 1, "y" : 2, "z" : 3 }
-            for case in [ "xx", "xy", "xz", "yx", "yy", "yz", "zx", "zy", "zz" ]:
-                ey_file = open( 'src/d2_ee_'+ kernel + '_'+case+'.ey', 'w' )
-                include_name = 'gto_d2_kit/d2_ee_' + kernel +"_"+case+ '.hpp'
+            # coord2case = { "x" : 1, "y" : 2, "z" : 3 }
+            # for case in [ "xx", "xy", "xz", "yx", "yy", "yz", "zx", "zy", "zz" ]:
+            #     ey_file = open( 'src/d2_ee_'+ kernel + '_'+case+'.ey', 'w' )
+            #     include_name = 'gto_d2_kit/d2_ee_' + kernel +"_"+case+ '.hpp'
     
-                ey_file.write( '#include "'+ include_name + '"\n')
-                ey_file.write('#include <cmath>\n')
-                ey_file.write('/*\n')
-                ey_file.write('<?\n')
-                ey_file.write('Use("emit_single_eri_d2.ys");\n')
-                ey_file.write('?>\n')
-                ey_file.write('*/\n')
-                ey_file.write('namespace { \n')
-                ey_file.write('    const double Pi = M_PI;\n')
-                ey_file.write('}\n')
-                ey_file.write('//<?\n')
-                ey_file.write('EmitSingleD2ERI( '+shells2num[ shells[0] ] +' , '+shells2num[ shells[1] ] +' , '
-                    + shells2num[ shells[2] ] +' , '+shells2num[ shells[3] ] +' , {' + atoms2num[ atoms[0] ]+ ' , '+
-                    atoms2num[ atoms[1] ] +'} , {'+str(coord2case[case[0]])+','+ str(coord2case[case[1]])+ ' } ); \n')
-                ey_file.write('//?>\n')
-                ey_file.close()
+            #     ey_file.write( '#include "'+ include_name + '"\n')
+            #     ey_file.write('#include <cmath>\n')
+            #     ey_file.write('/*\n')
+            #     ey_file.write('<?\n')
+            #     ey_file.write('Use("emit_single_eri_d2.ys");\n')
+            #     ey_file.write('?>\n')
+            #     ey_file.write('*/\n')
+            #     ey_file.write('namespace { \n')
+            #     ey_file.write('    const double Pi = M_PI;\n')
+            #     ey_file.write('}\n')
+            #     ey_file.write('//<?\n')
+            #     ey_file.write('EmitSingleD2ERI( '+shells2num[ shells[0] ] +' , '+shells2num[ shells[1] ] +' , '
+            #         + shells2num[ shells[2] ] +' , '+shells2num[ shells[3] ] +' , {' + atoms2num[ atoms[0] ]+ ' , '+
+            #         atoms2num[ atoms[1] ] +'} , {'+str(coord2case[case[0]])+','+ str(coord2case[case[1]])+ ' } ); \n')
+            #     ey_file.write('//?>\n')
+            #     ey_file.close()
                 
-                hpp_file = open( 'include/d2_ee_'+ kernel + '_'+case+'.hpp', 'w' )
+            #     hpp_file = open( 'include/d2_ee_'+ kernel + '_'+case+'.hpp', 'w' )
                 
-                hpp_file.write('#ifndef D2_EE_'+shells[0].upper()+shells[1].upper()+shells[2].upper()+shells[3].upper()+'_'+atoms[0].upper()+atoms[1].upper()+'_'+str(coord2case[case[0]]).upper()+ str(coord2case[case[1]]).upper()+'_HPP\n')
-                hpp_file.write('#define D2_EE_'+shells[0].upper()+shells[1].upper()+shells[2].upper()+shells[3].upper()+'_'+atoms[0].upper()+atoms[1].upper()+'_'+str(coord2case[case[0]]).upper()+ str(coord2case[case[1]]).upper()+'_HPP\n')
+            #     hpp_file.write('#ifndef D2_EE_'+shells[0].upper()+shells[1].upper()+shells[2].upper()+shells[3].upper()+'_'+atoms[0].upper()+atoms[1].upper()+'_'+str(coord2case[case[0]]).upper()+ str(coord2case[case[1]]).upper()+'_HPP\n')
+            #     hpp_file.write('#define D2_EE_'+shells[0].upper()+shells[1].upper()+shells[2].upper()+shells[3].upper()+'_'+atoms[0].upper()+atoms[1].upper()+'_'+str(coord2case[case[0]]).upper()+ str(coord2case[case[1]]).upper()+'_HPP\n')
                 
-                hpp_file.write('void second_derivative_ee_'+ nameKernel+"_"+str(coord2case[case[0]])+ str(coord2case[case[1]]) +'( \n')
+            #     hpp_file.write('void second_derivative_ee_'+ nameKernel+"_"+str(coord2case[case[0]])+ str(coord2case[case[1]]) +'( \n')
 
-                hpp_file.write('     const double ae,             \n')
-                hpp_file.write('     const double xA,	     \n')
-                hpp_file.write('     const double yA,             \n')
-                hpp_file.write('     const double zA,	     \n')
-                hpp_file.write('     const double be,             \n')
-                hpp_file.write('     const double xB,	     \n')
-                hpp_file.write('     const double yB,             \n')
-                hpp_file.write('     const double zB,	     \n')
-                hpp_file.write('     const double ce,             \n')
-                hpp_file.write('     const double xC,	     \n')
-                hpp_file.write('     const double yC,             \n')
-                hpp_file.write('     const double zC,	     \n')
-                hpp_file.write('     const double de,             \n')
-                hpp_file.write('     const double xD,	     \n')
-                hpp_file.write('     const double yD,             \n')
-                hpp_file.write('     const double zD,	     \n')
-                hpp_file.write('     const double* const bs, 	    \n')
-                hpp_file.write('     double* const d2ee);		  \n')
+            #     hpp_file.write('     const double ae,             \n')
+            #     hpp_file.write('     const double xA,	     \n')
+            #     hpp_file.write('     const double yA,             \n')
+            #     hpp_file.write('     const double zA,	     \n')
+            #     hpp_file.write('     const double be,             \n')
+            #     hpp_file.write('     const double xB,	     \n')
+            #     hpp_file.write('     const double yB,             \n')
+            #     hpp_file.write('     const double zB,	     \n')
+            #     hpp_file.write('     const double ce,             \n')
+            #     hpp_file.write('     const double xC,	     \n')
+            #     hpp_file.write('     const double yC,             \n')
+            #     hpp_file.write('     const double zC,	     \n')
+            #     hpp_file.write('     const double de,             \n')
+            #     hpp_file.write('     const double xD,	     \n')
+            #     hpp_file.write('     const double yD,             \n')
+            #     hpp_file.write('     const double zD,	     \n')
+            #     hpp_file.write('     const double* const bs, 	    \n')
+            #     hpp_file.write('     double* const d2ee);		  \n')
                 
-                hpp_file.write('#endif')
-                hpp_file.close()
+            #     hpp_file.write('#endif')
+            #     hpp_file.close()
                 
                 
                 

@@ -35,6 +35,8 @@ EchoSubfunctionBigL(  _l1, _l2, _l3, _l4, _o, _ints , _g, _csl , _r2processed, _
     Echo("    const double yD,");
     Echo("    const double zD,");
     Echo("    const double* const bs,");
+    Echo("    double* const r2,");
+    Echo("    double* const c2h,");
     Echo("    double* const ": d2result :")");
     Echo("{");
 
@@ -52,8 +54,6 @@ EchoSubfunctionBigL(  _l1, _l2, _l3, _l4, _o, _ints , _g, _csl , _r2processed, _
     Echo("    double dE[": String(Length(dEprocessed) + Length(dEreplaced)): "];");
     Echo("    double d2r2[": String(Length(d2r2processed) + Length(d2r2replaced)): "];");
     Echo("    double dr2[": String(Length(dr2processed) + Length(dr2processed)): "];");
-    Echo("    double r2[": String(Length(r2processed) + Length(r2replaced)): "];");
-    Echo("    double c2h[": String(Length(c2hProcessed) + Length(c2hReplaced)): "];");
 
     Echo("    second_derivative_ee_" : CppForm(l1) : CppForm(l2) : CppForm(l3) : CppForm(l4) : "_" : CppForm(o[1]): CppForm(o[2]) : "_" : d2result: "_d2r2(");
     Echo("    ae, xA, yA, zA, be, xB, yB, zB, ce, xC, yC, zC, de, xD, yD, zD, bs, d2r2);");

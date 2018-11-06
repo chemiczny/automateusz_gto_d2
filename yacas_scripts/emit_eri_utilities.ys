@@ -84,7 +84,7 @@ MoveAtoms2Csl2(_exprList, _csl, _g, _mainCsl) <-- [
     {csl, g, exprList, newExpr, mainCsl};
 ];
 
-
+//inline
 d2ERI'Csl( _csl, _derivE, _d2r2, _dr2, _r2, _ints, _g ) <-- [
 
 

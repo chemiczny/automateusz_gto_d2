@@ -242,7 +242,7 @@ EmitD2ERI(_l1, _l2, _l3, _l4, _o) <-- [
             WriteString("    " : d : Nl());
 
     If ( l1 < 2 And l2 < 2 And l3 < 2 And l4 < 2 , [
-    Echo("//Bez transformacji do sferycznych");
+    // Echo("//Bez transformacji do sferycznych");
     i := 0;
     For(m1 := 1, m1 <= ns1, m1++) [
         For(m2 := 1, m2 <= ns2, m2++) [

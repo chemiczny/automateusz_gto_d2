@@ -213,8 +213,13 @@ EmitD2ERIDivided(_l1, _l2, _l3, _l4, _o) <-- [
 
 
     For( caseIt := 1 , caseIt <= 9 , caseIt := caseIt+1 ) [
-        
-        EchoSubfunctionBigL(  l1, l2, l3, l4, o, ints , g[caseIt], csl[caseIt] , r2processed, r2replaced, c2hProcessed, c2hReplaced, d2r2[caseIt], dr2[caseIt], derivE[caseIt], d2result[caseIt] );
+        gTemp := g[caseIt];
+        cslTemp := csl[caseIt];
+        dr2Temp := dr2[caseIt];
+        d2r2Temp := d2r2[caseIt];
+        derivETemp := derivE[caseIt];
+        d2resultTemp := d2result[caseIt];
+        EchoSubfunctionBigL(  l1, l2, l3, l4, o, ints , gTemp, cslTemp , r2processed, r2replaced, c2hProcessed, c2hReplaced, d2r2Temp, dr2Temp, derivETemp, d2resultTemp );
 
     ];
 
@@ -269,9 +274,9 @@ EmitD2ERIDivided(_l1, _l2, _l3, _l4, _o) <-- [
     Echo("    ae, xA, yA, zA, be, xB, yB, zB, ce, xC, yC, zC, de, xD, yD, zD, bs, c2h);");
 
     For( caseIt := 1 , caseIt <= 9 , caseIt := caseIt+1 ) [
-        
+        d2resultTemp := d2result[caseIt];
         Echo("     second_derivative_ee_" : CppForm(l1) : CppForm(l2) : CppForm(l3) : CppForm(l4) : "_" : CppForm(o[1]): CppForm(o[2]) : "_" : d2result[caseIt]: "(");
-        Echo("    ae, xA, yA, zA, be, xB, yB, zB, ce, xC, yC, zC, de, xD, yD, zD, bs, ":d2result[caseIt]:");");
+        Echo("    ae, xA, yA, zA, be, xB, yB, zB, ce, xC, yC, zC, de, xD, yD, zD, bs, r2, c2h, ":d2resultTemp:");");
 
     ];
 
@@ -279,14 +284,14 @@ EmitD2ERIDivided(_l1, _l2, _l3, _l4, _o) <-- [
     Echo("}");
 ];
 
-ToFile("test.cpp") [
-   Echo("#include<cmath>");
-   Echo("double Pi = 3.0;");
-   // timeAll := GetTime([
-   EmitD2ERIDivided( 1, 0, 0, 0, {1, 1});
-   // ]);
+// ToFile("test.cpp") [
+//    Echo("#include<cmath>");
+//    Echo("double Pi = 3.0;");
+//    // timeAll := GetTime([
+//    EmitD2ERIDivided( 1, 0, 0, 0, {1, 1});
+//    // ]);
 
-   Echo("// Czas all: ":String(timeAll));
+//    Echo("// Czas all: ":String(timeAll));
 
-   Echo("int main() {} ;");
-];
+//    Echo("int main() {} ;");
+// ];

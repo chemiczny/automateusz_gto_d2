@@ -14,7 +14,7 @@ from os import remove
 import re
         
 class YacasInliner:
-    def __init__(self, yacasFile = "/home/michal/Projects/automateusz_gto_d2/yacas_scripts/emit_bigL_eri_d2_divided_iter.ys"):
+    def __init__(self, yacasFile = "/home/michal/Projects/automateusz_gto_d2/yacas_scripts/emit_bigL_eri_d2_divided.ys"):
         self.yacasMainFile = yacasFile
         self.yacasMainFileBasename = basename(yacasFile)
         self.yacasFileDir = dirname(yacasFile)
