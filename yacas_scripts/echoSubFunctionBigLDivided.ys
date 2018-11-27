@@ -85,7 +85,7 @@ EchoSubfunctionBigLDivided(  _l1, _l2, _l3, _l4, _o, _groups, _ints , _g, _csl ,
 
         For( elInd := 1 , elInd <= Length(group) , elInd := elInd +1  ) [
             element := group[elInd];
-            g[element[1]][element[2]][element[3]][element[4]] := Atom( "g":CppForm(groupInd) :"[":String(elInd):"]" );
+            g[element[1]][element[2]][element[3]][element[4]] := Atom( "g":CppForm(groupInd) :"[":String(elInd-1):"]" );
         ];
         
     ];

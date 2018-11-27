@@ -65,7 +65,7 @@ EmitGgroup(  _l1, _l2, _l3, _l4, _o, _g, _csl, _d2result, _gInd ) <-- [
     ForEach(d, CSE'EmitDefinitions(CSE'GenerateAssignments(csl)))
             WriteString("    " : d : Nl());
 
-    gInd :=1;
+    gInd :=0;
     ForEach( gEl , g ) [
     	Echo("    g[":String(gInd):"] = " : CppForm(gEl) : "; ");
     	gInd := gInd + 1;
